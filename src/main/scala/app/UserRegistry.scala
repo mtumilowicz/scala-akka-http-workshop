@@ -1,10 +1,7 @@
-package com.example
+package app
 
-//#user-registry-actor
-import akka.actor.typed.ActorRef
-import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
-import scala.collection.immutable
+import akka.actor.typed.{ActorRef, Behavior}
 
 object UserRegistry {
   // actor protocol
@@ -22,7 +19,7 @@ object UserRegistry {
   private def registry(users: Set[User]): Behavior[Command] =
     Behaviors.receiveMessage {
       case GetUsers(replyTo) =>
-        replyTo ! Users(users.toSeq)
+        replyTo ! app.Users(users.toSeq)
         Behaviors.same
       case CreateUser(user, replyTo) =>
         replyTo ! ActionPerformed(s"User ${user.name} created.")
@@ -35,4 +32,3 @@ object UserRegistry {
         registry(users.filterNot(_.name == name))
     }
 }
-//#user-registry-actor
