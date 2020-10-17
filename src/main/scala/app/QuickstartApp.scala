@@ -4,6 +4,8 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
+import app.domain.UserRegistry
+import app.gateway.{UserHandler, UserRoutes}
 
 import scala.util.{Failure, Success}
 

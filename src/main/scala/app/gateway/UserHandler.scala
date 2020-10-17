@@ -1,9 +1,10 @@
-package app
+package app.gateway
 
-import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.actor.typed.scaladsl.AskPattern._
+import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.util.Timeout
-import app.UserRegistry.{ActionPerformed, CreateUser, DeleteUser, GetUser, GetUserResponse, GetUsers}
+import app.domain.UserRegistry._
+import app.domain.{User, UserRegistry, Users}
 
 import scala.concurrent.Future
 
