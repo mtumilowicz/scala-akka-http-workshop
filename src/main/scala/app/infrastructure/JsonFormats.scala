@@ -1,7 +1,6 @@
 package app.infrastructure
 
-import app.domain.UserRegistry.ActionPerformed
-import app.domain.{User, Users}
+import app.domain.UserService.ActionPerformed
 import app.gateway.in.NewUserApiInput
 import app.gateway.out.{UserApiOutput, UsersApiOutput}
 import spray.json.DefaultJsonProtocol
