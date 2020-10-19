@@ -10,7 +10,7 @@ object UserRegistry {
 
   final case class GetUsers(replyTo: ActorRef[Users]) extends Command
 
-  final case class CreateUser(user: User, replyTo: ActorRef[ActionPerformed]) extends Command
+  final case class CreateUser(input: NewUserInput, replyTo: ActorRef[ActionPerformed]) extends Command
 
   final case class GetUser(name: String, replyTo: ActorRef[Option[User]]) extends Command
 
@@ -25,9 +25,9 @@ object UserRegistry {
       case GetUsers(replyTo) =>
         replyTo ! Users(users.toSeq)
         Behaviors.same
-      case CreateUser(user, replyTo) =>
-        replyTo ! ActionPerformed(s"User ${user.name} created.")
-        registry(users + user)
+      case CreateUser(input, replyTo) =>
+        replyTo ! ActionPerformed(s"User ${input.name} created.")
+        registry(users + User.createFrom(input))
       case GetUser(name, replyTo) =>
         replyTo ! users.find(_.name == name)
         Behaviors.same

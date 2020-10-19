@@ -1,7 +1,7 @@
 package app.gateway.in
 
-import app.domain.NewUserCommand
+import app.domain.NewUserInput
 
 case class NewUserApiInput(name: String, age: Int, countryOfResidence: String) {
-  def toDomain: NewUserCommand = NewUserCommand(name, age, countryOfResidence)
+  def toDomain: NewUserInput = NewUserInput(name, age, countryOfResidence)
 }

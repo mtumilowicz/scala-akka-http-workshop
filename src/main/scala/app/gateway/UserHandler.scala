@@ -4,7 +4,7 @@ import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.util.Timeout
 import app.domain.UserRegistry._
-import app.domain.{NewUserCommand, User, UserRegistry}
+import app.domain.{NewUserInput, User, UserRegistry}
 import app.gateway.out.{UserApiOutput, UsersApiOutput}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,8 +23,8 @@ class UserHandler(userRegistry: ActorRef[UserRegistry.Command])(implicit val sys
     userRegistry.ask(GetUser(name, _)).map(toOutput)
   }
 
-  def createUser(newUserCommand: NewUserCommand): Future[ActionPerformed] =
-    userRegistry.ask(CreateUser(User.createFrom(newUserCommand), _))
+  def createUser(newUserInput: NewUserInput): Future[ActionPerformed] =
+    userRegistry.ask(CreateUser(newUserInput, _))
 
   def deleteUser(name: String): Future[ActionPerformed] =
     userRegistry.ask(DeleteUser(name, _))
