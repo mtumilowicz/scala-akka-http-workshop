@@ -4,6 +4,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import app.domain.User
+import app.gateway.in.NewUserApiInput
 
 //#import-json-formats
 //#user-routes-class
@@ -27,8 +28,8 @@ class UserRoutes(userHandler: UserHandler) {
               complete(userHandler.getUsers())
             },
             post {
-              entity(as[User]) { user =>
-                onSuccess(userHandler.createUser(user)) { performed =>
+              entity(as[NewUserApiInput]) { user =>
+                onSuccess(userHandler.createUser(user.toDomain)) { performed =>
                   complete((StatusCodes.Created, performed))
                 }
               }
@@ -42,7 +43,7 @@ class UserRoutes(userHandler: UserHandler) {
               //#retrieve-user-info
               rejectEmptyResponse {
                 onSuccess(userHandler.getUser(name)) { response =>
-                  complete(response.maybeUser)
+                  complete(response)
                 }
               }
               //#retrieve-user-info

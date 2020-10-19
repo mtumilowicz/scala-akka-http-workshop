@@ -7,6 +7,7 @@ import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import app.domain.{User, UserRegistry}
+import app.gateway.in.NewUserApiInput
 import app.gateway.{UserHandler, UserRoutes}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpec}
@@ -54,7 +55,7 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
 
     //#testing-post
     "be able to add users (POST /users)" in {
-      val user = User("Kapi", 42, "jp")
+      val user = NewUserApiInput("Kapi", 42, "jp")
       val userEntity = Marshal(user).to[MessageEntity].futureValue // futureValue is from ScalaFutures
 
       // using the RequestBuilding DSL:
