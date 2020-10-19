@@ -6,7 +6,7 @@ import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import app.domain.{User, UserRegistry}
+import app.domain.{User, UserService}
 import app.gateway.in.NewUserApiInput
 import app.gateway.{UserHandler, UserRoutes}
 import org.scalatest.concurrent.ScalaFutures
@@ -27,7 +27,7 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
   // We use the real UserRegistryActor to test it while we hit the Routes,
   // but we could "mock" it by implementing it in-place or by using a TestProbe
   // created with testKit.createTestProbe()
-  val userRegistry = testKit.spawn(UserRegistry())
+  val userRegistry = testKit.spawn(UserService())
   lazy val routes = new UserRoutes(new UserHandler(userRegistry)).userRoutes
 
   // use the json formats to marshal and unmarshall objects in the test

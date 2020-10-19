@@ -3,7 +3,7 @@ package app.domain
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
 
-object UserRegistry {
+object UserService {
 
   // actor protocol
   sealed trait Command
@@ -18,21 +18,23 @@ object UserRegistry {
 
   final case class ActionPerformed(description: String)
 
-  def apply(): Behavior[Command] = registry(Set.empty)
+  def apply(): Behavior[Command] = registry()
 
-  private def registry(users: Set[User]): Behavior[Command] =
+  private def registry(): Behavior[Command] =
     Behaviors.receiveMessage {
       case GetUsers(replyTo) =>
-        replyTo ! Users(users.toSeq)
+        replyTo ! UserDatabase.findAll
         Behaviors.same
       case CreateUser(input, replyTo) =>
         replyTo ! ActionPerformed(s"User ${input.name} created.")
-        registry(users + User.createFrom(input))
+        UserDatabase.save(User.createFrom(input))
+        Behaviors.same
       case GetUser(name, replyTo) =>
-        replyTo ! users.find(_.name == name)
+        replyTo ! UserDatabase.findById(name)
         Behaviors.same
       case DeleteUser(name, replyTo) =>
         replyTo ! ActionPerformed(s"User $name deleted.")
-        registry(users.filterNot(_.name == name))
+        UserDatabase.delete(name)
+        Behaviors.same
     }
 }
