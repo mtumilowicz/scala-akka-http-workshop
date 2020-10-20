@@ -18,7 +18,7 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
   override def createActorSystem(): akka.actor.ActorSystem =
     testKit.system.classicSystem
 
-  val userRegistry = testKit.spawn(new UserService(UserRepositoryConfiguration.inMemory())())
+  val userRegistry = testKit.spawn(new UserService(UserRepositoryConfiguration.inMemory()).behaviour())
   lazy val routes = new UserRoutes(new UserHandler(userRegistry)).userRoutes
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
