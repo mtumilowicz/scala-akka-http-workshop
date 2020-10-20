@@ -3,14 +3,14 @@ package app.gateway
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.util.Timeout
-import app.domain.UserService._
-import app.domain.{NewUserInput, User, UserService}
+import app.domain.UserServiceProtocol._
+import app.domain.{NewUserInput, User, UserServiceProtocol}
 import app.gateway.out.{UserApiOutput, UsersApiOutput}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class UserHandler(userRegistry: ActorRef[UserService.Command])(implicit val system: ActorSystem[_]) {
+class UserHandler(userRegistry: ActorRef[UserServiceProtocol.Command])(implicit val system: ActorSystem[_]) {
 
   private implicit val timeout = Timeout.create(system.settings.config.getDuration("my-app.routes.ask-timeout"))
 
