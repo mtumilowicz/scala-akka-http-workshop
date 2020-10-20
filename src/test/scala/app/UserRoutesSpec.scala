@@ -7,7 +7,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import app.domain.{User, UserService, UserServiceProtocol}
 import app.gateway.in.NewUserApiInput
 import app.gateway.{UserHandler, UserRoutes}
-import app.infrastructure.UserRepositoryConfiguration
+import app.infrastructure.{UserRepositoryConfiguration, UserServiceConfiguration}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpec}
 
@@ -18,7 +18,7 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
   override def createActorSystem(): akka.actor.ActorSystem =
     testKit.system.classicSystem
 
-  val userRegistry = testKit.spawn(new UserService(UserRepositoryConfiguration.inMemory()).behaviour())
+  val userRegistry = testKit.spawn(UserServiceConfiguration.inMemoryBehaviour)
   lazy val routes = new UserRoutes(new UserHandler(userRegistry)).userRoutes
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._

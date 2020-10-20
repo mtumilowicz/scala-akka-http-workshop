@@ -1,12 +1,12 @@
 package app.infrastructure
 
 import akka.actor.typed.scaladsl.ActorContext
-import app.domain.UserService
+import app.domain.{UserService, UserServiceProtocol}
 import app.gateway.{UserHandler, UserRoutes}
 
 object RoutesConfig {
   def config(context: ActorContext[Nothing]): UserRoutes = {
-    val userRegistryActor = context.spawn(new UserService(UserRepositoryConfiguration.inMemory()).behaviour(), "UserRegistryActor")
+    val userRegistryActor = context.spawn(UserServiceConfiguration.inMemoryBehaviour, "UserServiceActor")
     context.watch(userRegistryActor)
 
     new UserRoutes(new UserHandler(userRegistryActor)(context.system))
