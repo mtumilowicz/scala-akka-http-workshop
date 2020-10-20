@@ -2,16 +2,11 @@ package app.domain
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
-import app.domain.UserServiceProtocol.{ActionPerformed, Command, CreateUser, DeleteUser, GetUser, GetUsers}
-import app.infrastructure.UserDatabase
+import app.domain.UserServiceProtocol._
 
 class UserService(repository: UserRepository) {
 
-  // actor protocol
-
-  def apply(): Behavior[Command] = registry()
-
-  private def registry(): Behavior[Command] =
+  def behaviour(): Behavior[Command] =
     Behaviors.receiveMessage {
       case GetUsers(replyTo) =>
         replyTo ! repository.findAll
@@ -31,6 +26,7 @@ class UserService(repository: UserRepository) {
 }
 
 object UserServiceProtocol {
+
   sealed trait Command
 
   final case class GetUsers(replyTo: ActorRef[Users]) extends Command
@@ -42,4 +38,5 @@ object UserServiceProtocol {
   final case class DeleteUser(name: String, replyTo: ActorRef[ActionPerformed]) extends Command
 
   final case class ActionPerformed(description: String)
+
 }
