@@ -1,0 +1,39 @@
+GET localhost:8080/users
+
+###
+
+POST localhost:8080/users
+Content-Type: application/json
+
+{
+  "name": "blabla",
+  "age": 10,
+  "countryOfResidence": "Warsaw"
+}
+
+###
+
+GET localhost:8080/users
+
+###
+
+POST localhost:8080/users
+Content-Type: application/json
+
+{
+  "name": "blabla2",
+  "age": 10,
+  "countryOfResidence": "Warsaw"
+}
+###
+
+GET localhost:8080/users
+
+###
+GET localhost:8080/users/blabla
+
+###
+DELETE localhost:8080/users/blabla
+
+###
+GET localhost:8080/users
