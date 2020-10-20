@@ -1,4 +1,6 @@
-package app.domain
+package app.infrastructure
+
+import app.domain.{User, Users}
 
 import scala.collection.mutable
 
