@@ -7,7 +7,6 @@ object UserServiceConfiguration {
 
   def inMemory: UserService = new UserService(UserRepositoryConfiguration.inMemory())
 
-  def inMemoryBehaviour: Behavior[UserServiceProtocol.Command] =
-    UserServiceProtocol.behaviour(inMemory)
+  def inMemoryBehaviour: Behavior[UserServiceProtocol.Command] = inMemory.behaviour
 
 }
