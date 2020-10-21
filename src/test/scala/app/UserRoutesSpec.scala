@@ -4,7 +4,6 @@ import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import app.domain.{User, UserService, UserServiceProtocol}
 import app.gateway.in.NewUserApiInput
 import app.gateway.{UserHandler, UserRoutes}
 import app.infrastructure.{UserRepositoryConfiguration, UserServiceConfiguration}

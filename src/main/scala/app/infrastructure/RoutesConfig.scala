@@ -1,7 +1,6 @@
 package app.infrastructure
 
 import akka.actor.typed.scaladsl.ActorContext
-import app.domain.{UserService, UserServiceProtocol}
 import app.gateway.{UserHandler, UserRoutes}
 
 object RoutesConfig {
