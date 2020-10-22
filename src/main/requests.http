@@ -30,10 +30,10 @@ Content-Type: application/json
 GET localhost:8080/users
 
 ###
-GET localhost:8080/users/blabla
+GET localhost:8080/users/67729e84-9f4b-403f-9723-3fe2d692a5e6
 
 ###
-DELETE localhost:8080/users/blabla
+DELETE localhost:8080/users/0187ed72-72c1-48f9-8c16-d1d2ea0b40a5
 
 ###
 GET localhost:8080/users

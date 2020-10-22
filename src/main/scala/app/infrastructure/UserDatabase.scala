@@ -18,8 +18,7 @@ object UserDatabase {
   }
 
   def deleteById(id: String): Option[UserId] = {
-    map.remove(id)
-    Option(UserId(id))
+    map.remove(id).map(_.id)
   }
 
 }

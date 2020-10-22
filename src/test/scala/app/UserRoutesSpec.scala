@@ -64,17 +64,28 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
     }
 
     "be able to remove users (DELETE /users)" in {
-      // user the RequestBuilding DSL provided by ScalatestRouteSpec:
-      val request = Delete(uri = "/users/Kapi")
+      val user = NewUserApiInput("Kapi", 42, "jp")
+      val userEntity = Marshal(user).to[MessageEntity].futureValue // futureValue is from ScalaFutures
+
+      // using the RequestBuilding DSL:
+      val request = Post("/users").withEntity(userEntity)
 
       request ~> routes ~> check {
-        status should ===(StatusCodes.OK)
+        status should ===(StatusCodes.Created)
 
-        // we expect the response to be json:
-        contentType should ===(ContentTypes.`application/json`)
+        def output = entityAs[UserApiOutput]
 
-        // and no entries should be in the list:
-        entityAs[String] should ===("""{"raw":"Kapi"}""")
+        val requestD = Delete(uri = "/users/" + output.id)
+
+        requestD ~> routes ~> check {
+          status should ===(StatusCodes.OK)
+
+          // we expect the response to be json:
+          contentType should ===(ContentTypes.`application/json`)
+
+
+          entityAs[UserId] should not be (null)
+        }
       }
     }
   }

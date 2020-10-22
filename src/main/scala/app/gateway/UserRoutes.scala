@@ -26,17 +26,18 @@ class UserRoutes(userHandler: UserHandler) {
               }
             })
         },
-        path(Segment) { name =>
+        path(Segment) { id =>
           concat(
             get {
-              onSuccess(userHandler.getUserById(name)) {
+              onSuccess(userHandler.getUserById(id)) {
                 case Some(value) => complete(value)
-                case None => complete(StatusCodes.NotFound, s"user with given name: $name not found")
+                case None => complete(StatusCodes.NotFound, s"user with given id: $id not found")
               }
             },
             delete {
-              onSuccess(userHandler.deleteUserById(name)) { performed =>
-                complete((StatusCodes.OK, performed))
+              onSuccess(userHandler.deleteUserById(id)) {
+                case Some(value) => complete(value)
+                case None => complete(StatusCodes.NotFound, s"user with given id: $id not found")
               }
             })
         })
