@@ -1,9 +1,11 @@
 package app
 
+import java.util.concurrent.TimeUnit
+
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.testkit.ScalatestRouteTest
+import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import app.domain.UserId
 import app.gateway.in.{NewUserApiInput, ReplaceUserApiInput}
 import app.gateway.out.UserApiOutput
@@ -12,11 +14,15 @@ import app.infrastructure.UserServiceConfiguration
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpec}
 
+import scala.concurrent.duration.Duration
+
 class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with ScalatestRouteTest {
 
   lazy val testKit = ActorTestKit()
 
   implicit def typedSystem = testKit.system
+
+  implicit val routeTestTimeout = RouteTestTimeout(Duration(5, TimeUnit.SECONDS))
 
   override def createActorSystem(): akka.actor.ActorSystem =
     testKit.system.classicSystem
