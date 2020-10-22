@@ -5,7 +5,7 @@ import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import app.domain.UserId
-import app.gateway.in.NewUserApiInput
+import app.gateway.in.{NewUserApiInput, ReplaceUserApiInput}
 import app.gateway.out.UserApiOutput
 import app.gateway.{UserHandler, UserRoutes}
 import app.infrastructure.UserServiceConfiguration
@@ -112,6 +112,36 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
 
 
           entityAs[UserId] should not be (null)
+        }
+      }
+    }
+
+    "be able to update user (GET /users)" in {
+      val user = NewUserApiInput("Kapi", 42, "jp")
+      val userEntity = Marshal(user).to[MessageEntity].futureValue // futureValue is from ScalaFutures
+
+      // using the RequestBuilding DSL:
+      val request = Post("/users").withEntity(userEntity)
+
+      request ~> routes ~> check {
+        status should ===(StatusCodes.Created)
+
+        def output = entityAs[UserApiOutput]
+
+        val userPut = ReplaceUserApiInput(output.id, "Kapi2", 42, "jp")
+        val userEntity = Marshal(userPut).to[MessageEntity].futureValue // futureValue is from ScalaFutures
+        val requestPut = Put(uri = "/users/" + output.id).withEntity(userEntity)
+
+        requestPut ~> routes ~> check {
+          status should ===(StatusCodes.OK)
+
+          // we expect the response to be json:
+          contentType should ===(ContentTypes.`application/json`)
+
+
+          def outputPut = entityAs[UserApiOutput]
+          outputPut.id should be (output.id)
+          outputPut.name should be ("Kapi2")
         }
       }
     }

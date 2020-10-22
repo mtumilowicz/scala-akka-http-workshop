@@ -3,7 +3,8 @@ package app.gateway
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import app.gateway.in.NewUserApiInput
+import app.domain.ReplaceUserInput
+import app.gateway.in.{NewUserApiInput, ReplaceUserApiInput}
 
 class UserRoutes(userHandler: UserHandler) {
 
@@ -39,7 +40,16 @@ class UserRoutes(userHandler: UserHandler) {
                 case Some(value) => complete(value)
                 case None => complete(StatusCodes.NotFound, s"user with given id: $id not found")
               }
-            })
+            },
+            put {
+              entity(as[ReplaceUserApiInput]) { user =>
+                onSuccess(userHandler.replaceUser(user.toDomain)) {
+                  case Some(value) => complete(value)
+                  case None => complete(StatusCodes.NotFound, s"user with given id: $id not found")
+                }
+              }
+            }
+          )
         })
     }
 }

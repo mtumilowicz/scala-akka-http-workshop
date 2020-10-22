@@ -10,7 +10,16 @@ class UserService(repository: UserRepository) {
 
   def save(input: NewUserInput): User = {
     def user = User.createFrom(input)
+
     repository.save(user)
+  }
+
+  def replace(input: ReplaceUserInput): Option[User] = {
+    def user = User.createFrom(input)
+
+    repository.findById(user.id.raw)
+      .map(_ => user)
+      .map(repository.save)
   }
 
   def findById(name: String): Option[User] = repository.findById(name)
@@ -26,6 +35,9 @@ class UserService(repository: UserRepository) {
         Behaviors.same
       case CreateUser(input, replyTo) =>
         replyTo ! save(input)
+        Behaviors.same
+      case ReplaceUser(input, replyTo) =>
+        replyTo ! replace(input)
         Behaviors.same
       case GetUserById(name, replyTo) =>
         replyTo ! findById(name)
