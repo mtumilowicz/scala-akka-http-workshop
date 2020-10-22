@@ -5,8 +5,6 @@ import app.domain.{UserService, UserServiceProtocol}
 
 object UserServiceConfiguration {
 
-  def inMemory: UserService = new UserService(UserRepositoryConfiguration.inMemory())
-
-  def inMemoryBehaviour: Behavior[UserServiceProtocol.Command] = inMemory.behaviour
+  def inMemoryBehaviour: Behavior[UserServiceProtocol.Command] = UserServiceProtocol()
 
 }
