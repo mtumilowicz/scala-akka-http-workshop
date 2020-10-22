@@ -63,6 +63,33 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
       }
     }
 
+    "be able to get user (GET /users)" in {
+      val user = NewUserApiInput("Kapi", 42, "jp")
+      val userEntity = Marshal(user).to[MessageEntity].futureValue // futureValue is from ScalaFutures
+
+      // using the RequestBuilding DSL:
+      val request = Post("/users").withEntity(userEntity)
+
+      request ~> routes ~> check {
+        status should ===(StatusCodes.Created)
+
+        def output = entityAs[UserApiOutput]
+
+        val requestG = Get(uri = "/users/" + output.id)
+
+        requestG ~> routes ~> check {
+          status should ===(StatusCodes.OK)
+
+          // we expect the response to be json:
+          contentType should ===(ContentTypes.`application/json`)
+
+
+          def outputGet = entityAs[UserApiOutput]
+          outputGet.id should be (output.id)
+        }
+      }
+    }
+
     "be able to remove users (DELETE /users)" in {
       val user = NewUserApiInput("Kapi", 42, "jp")
       val userEntity = Marshal(user).to[MessageEntity].futureValue // futureValue is from ScalaFutures
