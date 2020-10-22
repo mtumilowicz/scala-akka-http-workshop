@@ -6,8 +6,8 @@ trait UserRepository {
 
   def findById(id: String): Option[User]
 
-  def save(user: User): Unit
+  def save(user: User): User
 
-  def delete(userName: String): Unit
+  def deleteById(id: String): Option[UserId]
 
 }

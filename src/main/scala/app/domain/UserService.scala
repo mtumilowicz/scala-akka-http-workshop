@@ -8,16 +8,15 @@ class UserService(repository: UserRepository) {
 
   def findAll(): Users = repository.findAll
 
-  def save(input: NewUserInput): ActionPerformed = {
-    repository.save(User.createFrom(input))
-    ActionPerformed(s"User ${input.name} created.")
+  def save(input: NewUserInput): User = {
+    def user = User.createFrom(input)
+    repository.save(user)
   }
 
   def findById(name: String): Option[User] = repository.findById(name)
 
-  def delete(name: String): ActionPerformed = {
-    repository.delete(name)
-    ActionPerformed(s"User $name deleted.")
+  def deleteById(id: String): Option[UserId] = {
+    repository.deleteById(id)
   }
 
   def behaviour: Behavior[Command] =
@@ -28,11 +27,11 @@ class UserService(repository: UserRepository) {
       case CreateUser(input, replyTo) =>
         replyTo ! save(input)
         Behaviors.same
-      case GetUser(name, replyTo) =>
+      case GetUserById(name, replyTo) =>
         replyTo ! findById(name)
         Behaviors.same
-      case DeleteUser(name, replyTo) =>
-        replyTo ! delete(name)
+      case DeleteUserById(name, replyTo) =>
+        replyTo ! deleteById(name)
         Behaviors.same
     }
 }

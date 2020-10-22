@@ -1,8 +1,8 @@
 package app.domain
 
-final case class User(name: String, age: Int, countryOfResidence: String)
+final case class User(id: UserId, name: String, age: Int, countryOfResidence: String)
 
 object User {
   def createFrom(input: NewUserInput): User =
-    User(input.name, input.age, input.countryOfResidence)
+    User(UserId(java.util.UUID.randomUUID().toString), input.name, input.age, input.countryOfResidence)
 }

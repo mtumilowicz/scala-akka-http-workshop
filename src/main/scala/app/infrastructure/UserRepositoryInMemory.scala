@@ -1,17 +1,17 @@
 package app.infrastructure
 
-import app.domain.{User, UserRepository, Users}
+import app.domain.{User, UserId, UserRepository, Users}
 
 class UserRepositoryInMemory extends UserRepository {
 
-  private def database: UserDatabase.type = UserDatabase
+  private def database = UserDatabase
 
   def findAll: Users = database.findAll
 
   def findById(id: String): Option[User] = database.findById(id)
 
-  def save(user: User): Unit = database.save(user)
+  def save(user: User): User = database.save(user)
 
-  def delete(userName: String): Unit = database.delete(userName)
+  def deleteById(id: String): Option[UserId] = database.deleteById(id)
 
 }

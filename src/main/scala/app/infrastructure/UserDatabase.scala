@@ -1,6 +1,6 @@
 package app.infrastructure
 
-import app.domain.{User, Users}
+import app.domain.{User, UserId, Users}
 
 import scala.collection.mutable
 
@@ -12,12 +12,14 @@ object UserDatabase {
 
   def findById(id: String): Option[User] = map.get(id)
 
-  def save(user: User): Unit = {
-    map.put(user.name, user)
+  def save(user: User): User = {
+    map.put(user.id.raw, user)
+    user
   }
 
-  def delete(userName: String): Unit = {
-    map.remove(userName)
+  def deleteById(id: String): Option[UserId] = {
+    map.remove(id)
+    Option(UserId(id))
   }
 
 }
