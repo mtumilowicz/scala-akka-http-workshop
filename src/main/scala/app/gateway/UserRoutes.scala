@@ -43,7 +43,7 @@ class UserRoutes(userHandler: UserHandler) {
             },
             put {
               entity(as[ReplaceUserApiInput]) { user =>
-                onSuccess(userHandler.replaceUser(user.toDomain)) {
+                onSuccess(userHandler.replaceUser(user.toDomain(id))) {
                   case Some(value) => complete(value)
                   case None => complete(StatusCodes.NotFound, s"user with given id: $id not found")
                 }

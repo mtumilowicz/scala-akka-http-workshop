@@ -45,7 +45,7 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
       }
     }
 
-    "return users" in {
+    "return users if they are present" in {
       //      given
       createUser()
 
@@ -95,6 +95,16 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
       }
     }
 
+    "get not existing user by id" in {
+      //        when
+      val get = Get(uri = "/users/not-present")
+
+      //        then
+      get ~> routes ~> check {
+        status should ===(StatusCodes.NotFound)
+      }
+    }
+
     "remove existing user by id" in {
       //      given
       val id = createUser().id
@@ -109,11 +119,21 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
       }
     }
 
+    "remove not existing user by id" in {
+      //        when
+      val delete = Delete(uri = "/users/not-present")
+
+      //        then
+      delete ~> routes ~> check {
+        status should ===(StatusCodes.NotFound)
+      }
+    }
+
     "update existing user" in {
       //      given
         val id = createUser().id
-        val userPut = ReplaceUserApiInput(id, "Kapi2", 123, "jp2")
-        val userEntity = Marshal(userPut).to[MessageEntity].futureValue // futureValue is from ScalaFutures
+        val userPut = ReplaceUserApiInput("Kapi2", 123, "jp2")
+        val userEntity = Marshal(userPut).to[MessageEntity].futureValue
 
         //        when
         val requestPut = Put(uri = "/users/" + id).withEntity(userEntity)
@@ -127,6 +147,20 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
           outputPut.name should be("Kapi2")
           outputPut.age should be(123)
         }
+    }
+
+    "update not existing user" in {
+      //      given
+      val userPut = ReplaceUserApiInput("Kapi2", 123, "jp2")
+      val userEntity = Marshal(userPut).to[MessageEntity].futureValue
+
+      //        when
+      val requestPut = Put(uri = "/users/not-present").withEntity(userEntity)
+
+      //        then
+      requestPut ~> routes ~> check {
+        status should ===(StatusCodes.NotFound)
+      }
     }
 
     def createUser(): UserApiOutput = {

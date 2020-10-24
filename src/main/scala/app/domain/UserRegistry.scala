@@ -2,15 +2,15 @@ package app.domain
 
 import scala.collection.immutable
 
-class UserRegistry(private val map: immutable.Map[String, User] = immutable.Map()) {
+class UserRegistry(private val map: immutable.Map[UserId, User] = immutable.Map()) {
 
   def findAll: Users = Users(map.values.toSeq)
 
-  def findById(id: String): Option[User] = map.get(id)
+  def findById(id: UserId): Option[User] = map.get(id)
 
   def save(user: User): UserRegistry =
-    new UserRegistry(map + (user.id.raw -> user))
+    new UserRegistry(map + (user.id -> user))
 
-  def deleteById(id: String): UserRegistry =
+  def deleteById(id: UserId): UserRegistry =
     new UserRegistry(map - id)
 }

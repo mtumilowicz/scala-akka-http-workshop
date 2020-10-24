@@ -20,7 +20,7 @@ class UserHandler(userRegistry: ActorRef[UserServiceProtocol.Command])(implicit 
 
   def getUserById(id: String): Future[Option[UserApiOutput]] = {
     def toOutput: Option[User] => Option[UserApiOutput] = _.map(UserApiOutput.fromDomain)
-    userRegistry.ask(GetUserById(id, _)).map(toOutput)
+    userRegistry.ask(GetUserById(UserId(id), _)).map(toOutput)
   }
 
   def createUser(input: NewUserInput): Future[UserApiOutput] =
@@ -32,6 +32,6 @@ class UserHandler(userRegistry: ActorRef[UserServiceProtocol.Command])(implicit 
   }
 
   def deleteUserById(id: String): Future[Option[UserId]] =
-    userRegistry.ask(DeleteUserById(id, _))
+    userRegistry.ask(DeleteUserById(UserId(id), _))
 
 }
