@@ -13,9 +13,9 @@ object UserServiceProtocol {
 
   final case class ReplaceUser(input: ReplaceUserInput, replyTo: ActorRef[Option[User]]) extends Command
 
-  final case class GetUserById(id: String, replyTo: ActorRef[Option[User]]) extends Command
+  final case class GetUserById(id: UserId, replyTo: ActorRef[Option[User]]) extends Command
 
-  final case class DeleteUserById(name: String, replyTo: ActorRef[Option[UserId]]) extends Command
+  final case class DeleteUserById(name: UserId, replyTo: ActorRef[Option[UserId]]) extends Command
 
   def apply(): Behavior[Command] = behavior(new UserService(new UserRegistry()))
 

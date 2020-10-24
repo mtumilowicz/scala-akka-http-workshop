@@ -13,7 +13,7 @@ class UserService(repository: UserRegistry) {
   def replace(input: ReplaceUserInput): (Option[User], UserRegistry) = {
     val user = User.createFrom(input)
 
-    val userOpt = repository.findById(user.id.raw)
+    val userOpt = repository.findById(user.id)
       .map(_ => user)
 
     (userOpt, userOpt
@@ -21,9 +21,14 @@ class UserService(repository: UserRegistry) {
       .getOrElse(repository))
   }
 
-  def findById(id: String): Option[User] = repository.findById(id)
+  def findById(id: UserId): Option[User] = repository.findById(id)
 
-  def deleteById(id: String): (Option[UserId], UserRegistry) = {
-    (Option(UserId(id)), repository.deleteById(id))
+  def deleteById(id: UserId): (Option[UserId], UserRegistry) = {
+    val userId = repository.findById(id)
+      .map(_.id)
+
+    (userId, userId
+      .map(repository.deleteById)
+      .getOrElse(repository))
   }
 }
