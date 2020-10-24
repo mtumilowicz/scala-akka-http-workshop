@@ -17,9 +17,9 @@ object UserServiceProtocol {
 
   final case class DeleteUserById(name: String, replyTo: ActorRef[Option[UserId]]) extends Command
 
-  def apply(): Behavior[Command] = xxx(new UserService(new UserRegistry(Map())))
+  def apply(): Behavior[Command] = behavior(new UserService(new UserRegistry()))
 
-  def xxx(service: UserService) : Behavior[Command] = {
+  def behavior(service: UserService) : Behavior[Command] = {
     Behaviors.receiveMessage {
       case GetUsers(replyTo) =>
         replyTo ! service.findAll()
@@ -27,18 +27,18 @@ object UserServiceProtocol {
       case CreateUser(input, replyTo) =>
         val (user, database) = service.save(input)
         replyTo ! user
-        xxx(new UserService(database))
+        behavior(new UserService(database))
       case ReplaceUser(input, replyTo) =>
         val (userOpt, database) = service.replace(input)
         replyTo ! userOpt
-        xxx(new UserService(database))
+        behavior(new UserService(database))
       case GetUserById(id, replyTo) =>
         replyTo ! service.findById(id)
         Behaviors.same
       case DeleteUserById(id, replyTo) =>
         val (userOpt, database) = service.deleteById(id)
         replyTo ! userOpt
-        xxx(new UserService(database))
+        behavior(new UserService(database))
     }
   }
 }
