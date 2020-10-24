@@ -9,7 +9,7 @@ import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import app.domain.UserId
 import app.gateway.in.{NewUserApiInput, ReplaceUserApiInput}
 import app.gateway.out.{UserApiOutput, UsersApiOutput}
-import app.gateway.{UserHandler, UserRoutes, out}
+import app.gateway.{UserHandler, UserRoutes}
 import app.infrastructure.UserServiceConfiguration
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpec}
@@ -35,24 +35,24 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
 
   "UserRoutes" should {
     "return no users if no present" in {
-//      when
+      //      when
       val request = HttpRequest(uri = "/users")
 
-//      then
+      //      then
       request ~> routes ~> check {
         status should ===(StatusCodes.OK)
-        entityAs[UsersApiOutput] should be (UsersApiOutput(Seq()))
+        entityAs[UsersApiOutput] should be(UsersApiOutput(Seq()))
       }
     }
 
     "return users" in {
-//      given
+      //      given
       createUser()
 
-//      when
+      //      when
       val request = HttpRequest(uri = "/users")
 
-//      then
+      //      then
       request ~> routes ~> check {
         status should ===(StatusCodes.OK)
         entityAs[UsersApiOutput] should not be (UsersApiOutput(Seq()))
@@ -60,102 +60,84 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
     }
 
     "create user" in {
-//      given
+      //      given
       val user = NewUserApiInput("Kapi", 42, "jp")
       val userEntity = Marshal(user).to[MessageEntity].futureValue
 
-//      when
+      //      when
       val request = Post("/users").withEntity(userEntity)
 
-//      then
+      //      then
       request ~> routes ~> check {
         status should ===(StatusCodes.Created)
 
         val output = entityAs[UserApiOutput]
         output.id should not be (null)
-        output.name should be ("Kapi")
-        output.age should be (42)
+        output.name should be("Kapi")
+        output.age should be(42)
       }
     }
 
     "get existing user by id" in {
-//      given
-      val user = NewUserApiInput("Kapi", 42, "jp")
-      val userEntity = Marshal(user).to[MessageEntity].futureValue
-      val request = Post("/users").withEntity(userEntity)
-      request ~> routes ~> check {
-        val id = entityAs[UserApiOutput].id
+      //      given
+      val id = createUser().id
 
-//        when
-        val get = Get(uri = "/users/" + id)
+      //        when
+      val get = Get(uri = "/users/" + id)
 
-//        then
-        get ~> routes ~> check {
-          status should ===(StatusCodes.OK)
-          val outputOfGet = entityAs[UserApiOutput]
-          outputOfGet.id should be (id)
-          outputOfGet.name should be ("Kapi")
-          outputOfGet.age should be (42)
-        }
+      //        then
+      get ~> routes ~> check {
+        status should ===(StatusCodes.OK)
+        val outputOfGet = entityAs[UserApiOutput]
+        outputOfGet.id should be(id)
+        outputOfGet.name should be("Kapi")
+        outputOfGet.age should be(42)
       }
     }
 
     "remove existing user by id" in {
-//      given
-      val user = NewUserApiInput("Kapi", 42, "jp")
-      val userEntity = Marshal(user).to[MessageEntity].futureValue // futureValue is from ScalaFutures
-      val request = Post("/users").withEntity(userEntity)
+      //      given
+      val id = createUser().id
 
-      request ~> routes ~> check {
-        val id = entityAs[UserApiOutput].id
+      //        when
+      val delete = Delete(uri = "/users/" + id)
 
-//        when
-        val delete = Delete(uri = "/users/" + id)
-
-//        then
-        delete ~> routes ~> check {
-          status should ===(StatusCodes.OK)
-          entityAs[UserId].raw should be (id)
-        }
+      //        then
+      delete ~> routes ~> check {
+        status should ===(StatusCodes.OK)
+        entityAs[UserId].raw should be(id)
       }
     }
 
     "update existing user" in {
-//      given
-      val user = NewUserApiInput("Kapi", 42, "jp")
-      val userEntity = Marshal(user).to[MessageEntity].futureValue // futureValue is from ScalaFutures
-      val request = Post("/users").withEntity(userEntity)
-
-      request ~> routes ~> check {
-        status should ===(StatusCodes.Created)
-
-        val id = entityAs[UserApiOutput].id
-
-        val userPut = ReplaceUserApiInput(id, "Kapi2", 42, "jp")
+      //      given
+        val id = createUser().id
+        val userPut = ReplaceUserApiInput(id, "Kapi2", 123, "jp2")
         val userEntity = Marshal(userPut).to[MessageEntity].futureValue // futureValue is from ScalaFutures
 
-//        when
+        //        when
         val requestPut = Put(uri = "/users/" + id).withEntity(userEntity)
 
-//        then
+        //        then
         requestPut ~> routes ~> check {
           status should ===(StatusCodes.OK)
 
           val outputPut = entityAs[UserApiOutput]
-          outputPut.id should be (id)
-          outputPut.name should be ("Kapi2")
-          outputPut.age should be (42)
+          outputPut.id should be(id)
+          outputPut.name should be("Kapi2")
+          outputPut.age should be(123)
         }
+    }
+
+    def createUser(): UserApiOutput = {
+      val user = NewUserApiInput("Kapi", 42, "jp")
+      val userEntity = Marshal(user).to[MessageEntity].futureValue
+
+      val request = Post("/users").withEntity(userEntity)
+
+      request ~> routes ~> check {
+        entityAs[UserApiOutput]
       }
     }
-  }
-
-  def createUser(): Unit = {
-    val user = NewUserApiInput("Kapi", 42, "jp")
-    val userEntity = Marshal(user).to[MessageEntity].futureValue
-
-    val request = Post("/users").withEntity(userEntity)
-
-    request ~> routes
   }
 }
