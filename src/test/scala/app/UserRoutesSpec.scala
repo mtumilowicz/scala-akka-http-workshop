@@ -8,7 +8,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import app.domain.UserId
 import app.gateway.in.{NewUserApiInput, ReplaceUserApiInput}
-import app.gateway.out.UserApiOutput
+import app.gateway.out.{UserApiOutput, UsersApiOutput}
 import app.gateway.{UserHandler, UserRoutes}
 import app.infrastructure.UserServiceConfiguration
 import org.scalatest.concurrent.ScalaFutures
@@ -34,120 +34,103 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
   import app.infrastructure.JsonFormats._
 
   "UserRoutes" should {
-    "return no users if no present (GET /users)" in {
+    "return no users if no present" in {
+//      when
       val request = HttpRequest(uri = "/users")
 
+//      then
       request ~> routes ~> check {
         status should ===(StatusCodes.OK)
-
-        // we expect the response to be json:
-        contentType should ===(ContentTypes.`application/json`)
-
-        // and no entries should be in the list:
-        entityAs[String] should ===("""{"users":[]}""")
+        entityAs[UsersApiOutput] should be (UsersApiOutput(Seq()))
       }
     }
 
-    "be able to add users (POST /users)" in {
+    "add user" in {
+//      given
       val user = NewUserApiInput("Kapi", 42, "jp")
-      val userEntity = Marshal(user).to[MessageEntity].futureValue // futureValue is from ScalaFutures
+      val userEntity = Marshal(user).to[MessageEntity].futureValue
 
-      // using the RequestBuilding DSL:
+//      when
       val request = Post("/users").withEntity(userEntity)
 
+//      then
       request ~> routes ~> check {
         status should ===(StatusCodes.Created)
 
-        // we expect the response to be json:
-        contentType should ===(ContentTypes.`application/json`)
-
-        // and we know what message we're expecting back:
-        def output = entityAs[UserApiOutput]
+        val output = entityAs[UserApiOutput]
         output.id should not be (null)
-        output.name == "Kapi"
-        output.age == 42
+        output.name should be ("Kapi")
+        output.age should be (42)
       }
     }
 
-    "be able to get user (GET /users)" in {
+    "get existing user by id" in {
+//      given
       val user = NewUserApiInput("Kapi", 42, "jp")
-      val userEntity = Marshal(user).to[MessageEntity].futureValue // futureValue is from ScalaFutures
-
-      // using the RequestBuilding DSL:
+      val userEntity = Marshal(user).to[MessageEntity].futureValue
       val request = Post("/users").withEntity(userEntity)
-
       request ~> routes ~> check {
-        status should ===(StatusCodes.Created)
+        val id = entityAs[UserApiOutput].id
 
-        def output = entityAs[UserApiOutput]
+//        when
+        val get = Get(uri = "/users/" + id)
 
-        val requestG = Get(uri = "/users/" + output.id)
-
-        requestG ~> routes ~> check {
+//        then
+        get ~> routes ~> check {
           status should ===(StatusCodes.OK)
-
-          // we expect the response to be json:
-          contentType should ===(ContentTypes.`application/json`)
-
-
-          def outputGet = entityAs[UserApiOutput]
-          outputGet.id should be (output.id)
+          val outputOfGet = entityAs[UserApiOutput]
+          outputOfGet.id should be (id)
+          outputOfGet.name should be ("Kapi")
+          outputOfGet.age should be (42)
         }
       }
     }
 
-    "be able to remove users (DELETE /users)" in {
+    "remove existing user by id" in {
+//      given
       val user = NewUserApiInput("Kapi", 42, "jp")
       val userEntity = Marshal(user).to[MessageEntity].futureValue // futureValue is from ScalaFutures
-
-      // using the RequestBuilding DSL:
       val request = Post("/users").withEntity(userEntity)
 
       request ~> routes ~> check {
-        status should ===(StatusCodes.Created)
+        val id = entityAs[UserApiOutput].id
 
-        def output = entityAs[UserApiOutput]
+//        when
+        val delete = Delete(uri = "/users/" + id)
 
-        val requestD = Delete(uri = "/users/" + output.id)
-
-        requestD ~> routes ~> check {
+//        then
+        delete ~> routes ~> check {
           status should ===(StatusCodes.OK)
-
-          // we expect the response to be json:
-          contentType should ===(ContentTypes.`application/json`)
-
-
-          entityAs[UserId] should not be (null)
+          entityAs[UserId].raw should be (id)
         }
       }
     }
 
-    "be able to update user (GET /users)" in {
+    "update existing user" in {
+//      given
       val user = NewUserApiInput("Kapi", 42, "jp")
       val userEntity = Marshal(user).to[MessageEntity].futureValue // futureValue is from ScalaFutures
-
-      // using the RequestBuilding DSL:
       val request = Post("/users").withEntity(userEntity)
 
       request ~> routes ~> check {
         status should ===(StatusCodes.Created)
 
-        def output = entityAs[UserApiOutput]
+        val id = entityAs[UserApiOutput].id
 
-        val userPut = ReplaceUserApiInput(output.id, "Kapi2", 42, "jp")
+        val userPut = ReplaceUserApiInput(id, "Kapi2", 42, "jp")
         val userEntity = Marshal(userPut).to[MessageEntity].futureValue // futureValue is from ScalaFutures
-        val requestPut = Put(uri = "/users/" + output.id).withEntity(userEntity)
 
+//        when
+        val requestPut = Put(uri = "/users/" + id).withEntity(userEntity)
+
+//        then
         requestPut ~> routes ~> check {
           status should ===(StatusCodes.OK)
 
-          // we expect the response to be json:
-          contentType should ===(ContentTypes.`application/json`)
-
-
-          def outputPut = entityAs[UserApiOutput]
-          outputPut.id should be (output.id)
+          val outputPut = entityAs[UserApiOutput]
+          outputPut.id should be (id)
           outputPut.name should be ("Kapi2")
+          outputPut.age should be (42)
         }
       }
     }
