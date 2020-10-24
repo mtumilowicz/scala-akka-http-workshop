@@ -9,7 +9,7 @@ import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import app.domain.UserId
 import app.gateway.in.{NewUserApiInput, ReplaceUserApiInput}
 import app.gateway.out.{UserApiOutput, UsersApiOutput}
-import app.gateway.{UserHandler, UserRoutes}
+import app.gateway.{UserHandler, UserRoutes, out}
 import app.infrastructure.UserServiceConfiguration
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpec}
@@ -45,7 +45,21 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
       }
     }
 
-    "add user" in {
+    "return users" in {
+//      given
+      createUser()
+
+//      when
+      val request = HttpRequest(uri = "/users")
+
+//      then
+      request ~> routes ~> check {
+        status should ===(StatusCodes.OK)
+        entityAs[UsersApiOutput] should not be (UsersApiOutput(Seq()))
+      }
+    }
+
+    "create user" in {
 //      given
       val user = NewUserApiInput("Kapi", 42, "jp")
       val userEntity = Marshal(user).to[MessageEntity].futureValue
@@ -134,5 +148,14 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
         }
       }
     }
+  }
+
+  def createUser(): Unit = {
+    val user = NewUserApiInput("Kapi", 42, "jp")
+    val userEntity = Marshal(user).to[MessageEntity].futureValue
+
+    val request = Post("/users").withEntity(userEntity)
+
+    request ~> routes
   }
 }
