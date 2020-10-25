@@ -1,7 +1,7 @@
 package app.infrastructure
 
 import akka.actor.typed.Behavior
-import app.domain.{UserInMemoryRegistry, UserService, UserServiceProtocol}
+import app.domain.{UserService, UserServiceProtocol}
 
 object UserServiceConfiguration {
 

@@ -1,4 +1,6 @@
-package app.domain
+package app.infrastructure
+
+import app.domain._
 
 class UserInMemoryRegistry(private val map: Map[UserId, User] = Map())
 extends UserRegistry {
