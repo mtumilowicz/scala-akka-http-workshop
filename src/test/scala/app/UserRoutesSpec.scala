@@ -61,7 +61,7 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
 
     "create user" in {
       //      given
-      val user = NewUserApiInput("Kapi", 42, "jp")
+      val user = NewUserApiInput("Kapi", 42)
       val userEntity = Marshal(user).to[MessageEntity].futureValue
 
       //      when
@@ -132,7 +132,7 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
     "update existing user" in {
       //      given
         val id = createUser().id
-        val userPut = ReplaceUserApiInput("Kapi2", 123, "jp2")
+        val userPut = ReplaceUserApiInput("Kapi2", 123)
         val userEntity = Marshal(userPut).to[MessageEntity].futureValue
 
         //        when
@@ -151,7 +151,7 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
 
     "update not existing user" in {
       //      given
-      val userPut = ReplaceUserApiInput("Kapi2", 123, "jp2")
+      val userPut = ReplaceUserApiInput("Kapi2", 123)
       val userEntity = Marshal(userPut).to[MessageEntity].futureValue
 
       //        when
@@ -164,7 +164,7 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
     }
 
     def createUser(): UserApiOutput = {
-      val user = NewUserApiInput("Kapi", 42, "jp")
+      val user = NewUserApiInput("Kapi", 42)
       val userEntity = Marshal(user).to[MessageEntity].futureValue
 
       val request = Post("/users").withEntity(userEntity)
