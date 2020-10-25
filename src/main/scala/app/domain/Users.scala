@@ -1,5 +1,5 @@
 package app.domain
 
-import scala.collection.immutable
-
-final case class Users(users: immutable.Seq[User])
+final case class Users(raw: Seq[User]) {
+  def each[T](f: User => T): Seq[T] = raw.map(f)
+}

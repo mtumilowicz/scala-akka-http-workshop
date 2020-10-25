@@ -2,10 +2,8 @@ package app.gateway.out
 
 import app.domain.Users
 
-import scala.collection.immutable
-
-final case class UsersApiOutput(users: immutable.Seq[UserApiOutput])
+final case class UsersApiOutput(users: Seq[UserApiOutput])
 
 object UsersApiOutput {
-  def fromDomain(users: Users): UsersApiOutput = UsersApiOutput(users.users.map(UserApiOutput.fromDomain))
+  def fromDomain(users: Users): UsersApiOutput = UsersApiOutput(users.raw.map(UserApiOutput.fromDomain))
 }

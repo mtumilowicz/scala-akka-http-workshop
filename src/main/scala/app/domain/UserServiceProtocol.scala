@@ -17,7 +17,7 @@ object UserServiceProtocol {
 
   final case class DeleteUserById(name: UserId, replyTo: ActorRef[Option[UserId]]) extends Command
 
-  def apply(): Behavior[Command] = behavior(new UserService(new UserRegistry()))
+  def apply(initialBehavior: UserService): Behavior[Command] = behavior(initialBehavior)
 
   def behavior(service: UserService) : Behavior[Command] = {
     Behaviors.receiveMessage {
