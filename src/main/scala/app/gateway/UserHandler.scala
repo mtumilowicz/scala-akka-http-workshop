@@ -5,7 +5,7 @@ import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.util.Timeout
 import app.domain.UserServiceProtocol._
 import app.domain.{NewUserInput, ReplaceUserInput, User, UserId, UserServiceProtocol}
-import app.gateway.out.{UserApiOutput, UsersApiOutput}
+import app.gateway.out.{UserApiOutput, UserApiOutputBuilder, UsersApiOutput, UsersApiOutputBuilder}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -16,18 +16,18 @@ class UserHandler(userRegistry: ActorRef[UserServiceProtocol.Command])(implicit 
 
 
   def getUsers(): Future[UsersApiOutput] =
-    userRegistry.ask(GetUsers).map(UsersApiOutput.fromDomain)
+    userRegistry.ask(GetUsers).map(UsersApiOutputBuilder.fromDomain)
 
   def getUserById(id: String): Future[Option[UserApiOutput]] = {
-    def toOutput: Option[User] => Option[UserApiOutput] = _.map(UserApiOutput.fromDomain)
+    def toOutput: Option[User] => Option[UserApiOutput] = _.map(UserApiOutputBuilder.fromDomain)
     userRegistry.ask(GetUserById(UserId(id), _)).map(toOutput)
   }
 
   def createUser(input: NewUserInput): Future[UserApiOutput] =
-    userRegistry.ask(CreateUser(input, _)).map(UserApiOutput.fromDomain)
+    userRegistry.ask(CreateUser(input, _)).map(UserApiOutputBuilder.fromDomain)
 
   def replaceUser(input: ReplaceUserInput): Future[Option[UserApiOutput]] = {
-    def toOutput: Option[User] => Option[UserApiOutput] = _.map(UserApiOutput.fromDomain)
+    def toOutput: Option[User] => Option[UserApiOutput] = _.map(UserApiOutputBuilder.fromDomain)
     userRegistry.ask(ReplaceUser(input, _)).map(toOutput)
   }
 
