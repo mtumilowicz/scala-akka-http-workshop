@@ -10,7 +10,10 @@ object HttpServerConfig {
   def startHttpServer(routes: Route)(implicit system: ActorSystem[_]): Unit = {
     import system.executionContext
 
-    val futureBinding = Http().newServerAt("localhost", 8080).bind(routes)
+    val host = system.settings.config.getString("my-app.server.host")
+    val port = system.settings.config.getInt("my-app.server.port")
+
+    val futureBinding = Http().newServerAt(host, port).bind(routes)
     futureBinding.onComplete {
       case Success(binding) =>
         val address = binding.localAddress
