@@ -1,7 +1,7 @@
 # scala-akka-http-actor-workshop
 * https://medium.com/se-notes-by-alexey-novakov/crud-microservice-with-akkahttp-c914059bcf9f
 * https://www.manning.com/books/akka-in-action
-
+* https://doc.akka.io/docs/akka-http/10.2.1/
 
 * This leads to two goals: complexity has to stay as low as possible, and resources
   must be used efficiently while you scale the application.
@@ -368,3 +368,30 @@
         * This BackOfSupervisor creates the actor
           from the Props and supervises it, and does use a delay mechanism to prevent
           fast restarts.
+          
+          
+# akka http
+* The Akka HTTP modules implement a full server- and client-side HTTP stack on top of akka-actor and akka-stream
+* The high-level, routing API of Akka HTTP provides a DSL to describe HTTP “routes” and how they should be handled
+* Marshalling
+    * Transforming request and response bodies between over-the-wire formats and objects to be used in your 
+    application is done separately from the route declarations, in marshallers, which are pulled in implicitly 
+    using the “magnet” pattern. 
+    * This means that you can complete a request with any kind of object as long as there is an implicit marshaller 
+    available in scope.
+    * Marshalling is the process of converting a higher-level (object) structure into some kind of lower-level 
+    representation, often a “wire format”. Other popular names for marshalling are “serialization” or “pickling”.
+* unmarshalling
+    * “Unmarshalling” is the process of converting some kind of a lower-level representation, often a “wire format”, into a higher-level (object) structure. Other popular names for it are “Deserialization” or “Unpickling”.
+* Timeouts
+    * idle-timeout is a global setting which sets the maximum inactivity time of a given connection
+        * In other words, if a connection is open but no request/response is being written to it for over idle-timeout time, the connection will be automatically closed.
+            ```
+            akka.http.server.idle-timeout
+            akka.http.client.idle-timeout
+            akka.http.host-connection-pool.idle-timeout
+            akka.http.host-connection-pool.client.idle-timeout
+            ```
+        * Request timeouts are a mechanism that limits the maximum time it may take to produce an HttpResponse from a route
+            * If that deadline is not met the server will automatically inject a Service Unavailable HTTP response and close the connection to prevent it from leaking and staying around indefinitely (for example if by programming error a Future would never complete, never sending the real response otherwise).
+* Server API
