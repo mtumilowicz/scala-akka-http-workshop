@@ -1,6 +1,6 @@
 package app.gateway
 
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.model.headers.Location
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
@@ -25,7 +25,11 @@ class UserRoutes(userHandler: UserHandler) {
             post {
               entity(as[NewUserApiInput]) { user =>
                 onSuccess(userHandler.createUser(user.toDomain)) { user => {
-                  val host = Location(resources.getString("my-app.server.host") + s"/users/${user.id}")
+                  val uri = Uri.from(scheme = "http", host = resources.getString("my-app.server.host"),
+                    port = resources.getInt("my-app.server.port"),
+                    path = s"/users/${user.id}"
+                  )
+                  val host = Location(uri)
                   complete((StatusCodes.Created, Seq(host), user))
                 }
                 }

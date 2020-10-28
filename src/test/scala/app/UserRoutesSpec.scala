@@ -76,7 +76,7 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
         output.name should be("Kapi")
         output.age should be(42)
 
-        header("location").map(_.value()) should ===(Some(s"localhost/users/${output.id}"))
+        header("location").map(_.value()) should ===(Some(s"http://localhost:8080/users/${output.id}"))
       }
     }
 
