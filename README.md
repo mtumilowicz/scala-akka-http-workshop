@@ -1,5 +1,7 @@
 # scala-akka-http-actor-workshop
 * https://medium.com/se-notes-by-alexey-novakov/crud-microservice-with-akkahttp-c914059bcf9f
+* https://www.manning.com/books/akka-in-action
+
 
 * This leads to two goals: complexity has to stay as low as possible, and resources
   must be used efficiently while you scale the application.
