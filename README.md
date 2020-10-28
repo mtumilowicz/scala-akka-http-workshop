@@ -3,118 +3,90 @@
 * https://www.manning.com/books/akka-in-action
 * https://doc.akka.io/docs/akka-http/10.2.1/
 
-* This leads to two goals: complexity has to stay as low as possible, and resources
-  must be used efficiently while you scale the application.
-* The Reactive Manifesto
-    * Blocking I/O limits opportunities for parallelism, so nonblocking I/O is preferred.
-    * Synchronous interaction limits opportunities for parallelism, so asynchronous interaction is preferred.
-    * Polling reduces opportunity to use fewer resources, so an event-driven style is preferred.
-    * If one node can bring down all other nodes, that’s a waste of resources. So
-    you need isolation of errors (resilience) to avoid losing all your work.
-    * Systems need to be elastic: If there’s less demand, you want to use fewer resources. 
-        * If there’s more demand, use more resources, but never more than required.
-* Differences between approaches
-    * Scaling
-        * Use a mix of threads, shared
-          mutable state in a database (Cre-
-          ate, Insert, Update, Delete), and
-          web service RPC calls for scaling.
-        * Actors send and receive messages.
-          No shared mutable state. Immuta-
-          ble log of events.
-    * Providing interactive information
-        * Poll for current information. 
-        * Event-driven: push when the event occurs.
-    * Scaling out on the network
-        * Synchronous RPC, blocking I/O.
-        * Asynchronous messaging, nonblocking I/O.
-    * Handling failures
-        * Handle all exceptions; only continue if everything works.
-        * Let it crash. Isolate failure, and continue without failing parts.
-* event-driven approach has a couple of advantages:
-  * It minimizes direct dependencies between components. 
-    * The conversation doesn’t know about the Mentions object and could not care less what happens with the event. 
-    * The conversation can continue to operate when the Mentions object crashes.
-  * The components of the application are loosely coupled in time. 
-    * It doesn’t matter if the Mentions object gets the events a little later, as long as it gets the
-    events eventually.
-  * The components are decoupled in terms of location. 
-    * The Conversation and Mentions object can reside on different servers; the events are just messages
-    that can be transmitted over the network.
-* A concurrent system is not by definition a parallel system. 
-    * Concurrent processes can, for example, be executed on one CPU through the use of time slicing, 
-    where every process gets a certain amount of time to run on the CPU , one after another.
+# preface
+* two ultimate goals: 
+    1. complexity has to stay as low as possible
+    1. resources must be used efficiently while you scale the application.
+* actors vs synchronous approach
+    * tabelę zrobić
+    * scaling
+        * mix of threads, shared mutable state in a CRUD database, and web service RPC calls
+        * send and receive messages, no shared mutable state, immutable log of events
+    * providing interactive information
+        * poll for current information 
+        * event-driven: push when the event occurs
+    * scaling out on the network
+        * synchronous RPC, blocking I/O
+        * asynchronous messaging, nonblocking I/O
+    * handling failures
+        * handle all exceptions; only continue if everything works
+        * let it crash, isolate failure, and continue without failing parts
 * The actor model chooses the abstraction of send-
   ing and receiving messages to decouple from the number of threads or the number of
   servers that are being used.
 * If we want the application to scale to many servers, there’s an important requirement
   for the programming model: it will have to be asynchronous, allowing components to
-  continue working while others haven’t responded yet, as in the chat application
-* 1.6.2 Actor operations
-    * An actor is a lightweight process that has only four core operations: create, send, become, and supervise. 
-        * All of these operations are asynchronous.
-    * SEND
-        * An actor can only communicate with another actor by sending it messages. 
-            * This takes encapsulation to the next level.
+  continue working while others haven’t responded yet
+## actor operations
+* An actor is a lightweight process that has only four core operations: create, send, become, and supervise. 
+    * All of these operations are asynchronous.
+* SEND
+    * An actor can only communicate with another actor by sending it messages. 
+        * This takes encapsulation to the next level.
             * in objects we can specify which methods can be publicly called and which state is accessible 
             from the outside.
-                * Actors don’t allow any access to internal state
-        * Actors can’t share mutable state
-        * Sending messages is always asynchronous, in what is called a fire and forget style.
-            * If it’s important to know
-              that another actor received the message, then the receiving actor should just send
-              back an acknowledgement message of some kind.
-        * WHAT, NO TYPE SAFETY?
-            * Actors can receive any message, and you can send
-              any message you want to an actor (it just might not process the message)
-            * This basically means that type checking of the messages that are sent and received
-              is limited
-            * The order of messages is only guaranteed per sending actor, so if many
-              users edit the same message in a conversation, the final result can
-              vary depending on how the messages are interleaved over time.
-    * CREATE
-        * An actor can create other actors
-        * this automatically creates a hierarchy of actors
-    * BECOME
-        * State machines are a great tool for making sure that a system only executes particular
-          actions when it’s in a specific state.
-        * Actors receive messages one at a time, which is a convenient property for imple-
-          menting state machines
-            * An actor can change how it handles incoming messages by swapping out its behavior.
-                * Imagine that users want to be able to close a Conversation
-                    * The Conversation starts out in a started state and becomes closed when a CloseConversation 
-                    is received. 
-                    * Any message that’s sent to the closed Conversation could be ignored. 
-                    * The Conversation swaps its behavior from adding messages to itself to ignoring all messages.
-    * SUPERVISE
-        * An actor needs to supervise the actors that it creates
-            * The supervisor in the chat application can keep track of what’s happening to the main components
-        * The Supervisor decides what should happen when components fail in the system
-            * The Supervisor gets notified with special messages that indicate which actor has
-              crashed, and for what reason. 
-            * The Supervisor can decide to restart an actor or take the actor out of service.
-                * it could decide to take the OutlookContacts actor out of service because it failed
-                  too often
-        * Any actor can be a supervisor, but only for actors that it creates itself
-        * Actors: decoupled on three axes
-            * Decoupling on exactly these three axes is important because this is exactly the flex-
-              ibility that’s required for scaling
-              * Space/Location
-                * An actor gives no guarantee and has no expectation about where
-                  another actor is located.
-              * Time
-                * An actor gives no guarantee and has no expectation about when its
-                  work will be done.
-              * Interface
-                * An actor has no defined interface
-                * An actor has no expectation about which messages other components can understand
-                * Nothing is shared between actors; 
-                * actors never point to or use a shared piece of information that changes in place. 
-                * Information is passed in messages.
-            * Coupling components in location, time, and interface is the biggest impediment to
-              building applications that can recover from failure and scale according to demand
-            * A system built out of components that are coupled on all three axes can only exist on
-              one runtime and will fail completely if one of its components fails.
+            * Actors don’t allow any access to internal state
+    * Sending messages is always asynchronous, in what is called a fire and forget style.
+        * If it’s important to know
+          that another actor received the message, then the receiving actor should just send
+          back an acknowledgement message of some kind.
+    * The order of messages is only guaranteed per sending actor, so if many
+    users edit the same message in a conversation, the final result can
+    vary depending on how the messages are interleaved over time.
+* CREATE
+    * An actor can create other actors
+    * this automatically creates a hierarchy of actors
+* BECOME
+    * State machines are a great tool for making sure that a system only executes particular
+      actions when it’s in a specific state.
+    * Actors receive messages one at a time, which is a convenient property for imple-
+      menting state machines
+        * An actor can change how it handles incoming messages by swapping out its behavior.
+            * Imagine that users want to be able to close a Conversation
+                * The Conversation starts out in a started state and becomes closed when a CloseConversation 
+                is received. 
+                * Any message that’s sent to the closed Conversation could be ignored. 
+                * The Conversation swaps its behavior from adding messages to itself to ignoring all messages.
+* SUPERVISE
+    * An actor needs to supervise the actors that it creates
+        * The supervisor in the chat application can keep track of what’s happening to the main components
+    * The Supervisor decides what should happen when components fail in the system
+        * The Supervisor gets notified with special messages that indicate which actor has
+          crashed, and for what reason. 
+        * The Supervisor can decide to restart an actor or take the actor out of service.
+            * it could decide to take the OutlookContacts actor out of service because it failed
+              too often
+    * Any actor can be a supervisor, but only for actors that it creates itself
+    * Actors: decoupled on three axes
+        * Decoupling on exactly these three axes is important because this is exactly the flex-
+          ibility that’s required for scaling
+          * Space/Location
+            * An actor gives no guarantee and has no expectation about where
+              another actor is located.
+          * Time
+            * An actor gives no guarantee and has no expectation about when its
+              work will be done.
+          * Interface
+            * An actor has no defined interface
+            * An actor has no expectation about which messages other components can understand
+            * Nothing is shared between actors; 
+            * actors never point to or use a shared piece of information that changes in place. 
+            * Information is passed in messages.
+        * Coupling components in location, time, and interface is the biggest impediment to
+          building applications that can recover from failure and scale according to demand
+        * A system built out of components that are coupled on all three axes can only exist on
+          one runtime and will fail completely if one of its components fails.
+## constructs
 * 1.7.1 ActorSystem
     * Actors can create other actors, but who creates the first one?
         * The first thing that every Akka application does is create an ActorSystem
