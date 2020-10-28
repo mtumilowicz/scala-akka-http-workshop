@@ -113,11 +113,12 @@
     linked to actors
 
 # failure
-* Akka Actor provides two separate flows: one for normal logic and one for fault recovery logic
-* The normal flow consists of actors that handle normal messages; the recovery
-  flow consists of actors that monitor the actors in the normal flow
-* Actors that monitor other actors are called supervisors
-* Instead of catching exceptions in an actor, we’ll just let the actor crash
+* actor provides two separate flows
+    * one for normal logic
+        * consists of actors that handle normal messages
+    * one for fault recovery logic
+        * consists of actors that monitor the actors in the normal flow
+* instead of catching exceptions in an actor, we’ll just let the actor crash
 * The actor code for handling messages only contains normal processing logic and no error han-
   dling or fault recovery logic, so it’s effectively not part of the recovery process, which
   keeps things much clearer
