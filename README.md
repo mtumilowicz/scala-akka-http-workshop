@@ -347,3 +347,11 @@
         * Request timeouts are a mechanism that limits the maximum time it may take to produce an HttpResponse from a route
             * If that deadline is not met the server will automatically inject a Service Unavailable HTTP response and close the connection to prevent it from leaking and staying around indefinitely (for example if by programming error a Future would never complete, never sending the real response otherwise).
 * Server API
+    * Akka HTTP also provides an embedded, Reactive-Streams-based, fully asynchronous HTTP/1.1 server implemented on top of Streams.
+    * The “Route” is the central concept of Akka HTTP’s Routing DSL
+        * type Route = RequestContext => Future[RouteResult]
+    * Generally when a route receives a request (or rather a RequestContext for it) it can do one of these things:
+        * Complete the request by returning the value of requestContext.complete(...)
+        * Reject the request by returning the value of requestContext.reject(...) (see Rejections)
+        * Fail the request by returning the value of requestContext.fail(...) or by just throwing an exception (see Exception Handling)
+        * Do any kind of asynchronous processing and instantly return a Future[RouteResult] to be eventually completed later
