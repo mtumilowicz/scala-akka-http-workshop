@@ -4,76 +4,34 @@
 * https://doc.akka.io/docs/akka-http/10.2.1/
 
 # preface
-* two ultimate goals: 
+* https://github.com/mtumilowicz/scala213-functional-programming-collections-workshop (scala intro)
+* https://github.com/mtumilowicz/kotlin-functional-programming-actors-workshop (actors intro)
+    
+# introduction
+* two ultimate goals during software development
     1. complexity has to stay as low as possible
-    1. resources must be used efficiently while you scale the application.
+    1. resources must be used efficiently while you scale the application
+* if we want to scale, the programming model has to be asynchronous
+    * allows components to continue working while others haven’t responded yet
+    * actor model chooses the abstraction of sending and receiving messages
 * actors vs synchronous approach
-    * tabelę zrobić
-    * scaling
-        * mix of threads, shared mutable state in a CRUD database, and web service RPC calls
-        * send and receive messages, no shared mutable state, immutable log of events
-    * providing interactive information
-        * poll for current information 
-        * event-driven: push when the event occurs
-    * scaling out on the network
-        * synchronous RPC, blocking I/O
-        * asynchronous messaging, nonblocking I/O
-    * handling failures
-        * handle all exceptions; only continue if everything works
-        * let it crash, isolate failure, and continue without failing parts
-* The actor model chooses the abstraction of send-
-  ing and receiving messages to decouple from the number of threads or the number of
-  servers that are being used.
-* If we want the application to scale to many servers, there’s an important requirement
-  for the programming model: it will have to be asynchronous, allowing components to
-  continue working while others haven’t responded yet
+    |                                   |actors   |synchronous approach   |
+    |---                                |---      |---|
+    |scaling                            |send and receive messages, no shared mutable state, immutable log of events    |mix of threads, shared mutable state in a CRUD database, and web service RPC calls   |
+    |providing interactive information  |event-driven: push when the event occurs                                       |poll for current information    |
+    |scaling out on the network         |asynchronous messaging, nonblocking I/O                                        |synchronous RPC, blocking I/O       |
+    |handling failures                  |let it crash, isolate failure, and continue without failing parts              |handle all exceptions; only continue if everything works   |
 * actors: decoupled on three axes
-    * exactly the flexibility that’s required for scaling
-        * Coupling components in location, time, and interface is the biggest impediment to
-          building applications that can recover from failure and scale according to demand
-        * A system built out of components that are coupled on all three axes can only exist on
-          one runtime and will fail completely if one of its components fails.
-    * Space/Location
-        * An actor gives no guarantee and has no expectation about where another actor is located
-    * Time
-        * An actor gives no guarantee and has no expectation about when its work will be done.
-    * Interface
-        * Nothing is shared between actors; 
-        * Information is passed in messages.
+    * space/location
+        * actor gives no guarantee and has no expectation about where another actor is located
+    * time
+        * actor gives no guarantee and has no expectation about when its work will be done
+    * interface
+        * nothing is shared between actors
+        * information is passed in messages
+    * system built out of components coupled on all three axes can only exist on
+      one runtime and will fail completely if one of its components fails
         
-## actor operations
-* An actor is a lightweight process that has only four core operations: create, send, become, and supervise. 
-    * All of these operations are asynchronous.
-* SEND
-    * An actor can only communicate with another actor by sending it messages. 
-        * This takes encapsulation to the next level.
-            * in objects we can specify which methods can be publicly called and which state is accessible 
-            from the outside.
-            * Actors don’t allow any access to internal state
-    * Sending messages is always asynchronous, in what is called a fire and forget style.
-        * If it’s important to know
-          that another actor received the message, then the receiving actor should just send
-          back an acknowledgement message of some kind.
-    * The order of messages is only guaranteed per sending actor, so if many
-    users edit the same message in a conversation, the final result can
-    vary depending on how the messages are interleaved over time.
-* CREATE
-    * An actor can create other actors
-    * this automatically creates a hierarchy of actors
-* BECOME
-    * State machines are a great tool for making sure that a system only executes particular
-      actions when it’s in a specific state.
-    * Actors receive messages one at a time, which is a convenient property for imple-
-      menting state machines
-        * An actor can change how it handles incoming messages by swapping out its behavior.
-* SUPERVISE
-    * An actor needs to supervise the actors that it creates
-    * The Supervisor decides what should happen when components fail in the system
-        * The Supervisor gets notified with special messages that indicate which actor has
-          crashed, and for what reason. 
-        * The Supervisor can decide to restart an actor or take the actor out of service.
-    * Any actor can be a supervisor, but only for actors that it creates itself
-
 ## constructs
 * ActorSystem
     * actors can create other actors, but who creates the first one?
