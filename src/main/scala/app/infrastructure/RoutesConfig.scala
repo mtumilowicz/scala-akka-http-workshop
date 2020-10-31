@@ -5,9 +5,9 @@ import app.gateway.{UserHandler, UserRoutes}
 
 object RoutesConfig {
   def config(context: ActorContext[Nothing]): UserRoutes = {
-    val userRegistryActor = context.spawn(UserServiceConfiguration.inMemoryBehaviour, "UserServiceActor")
-    context.watch(userRegistryActor)
+    val userServiceActor = context.spawn(UserServiceConfiguration.inMemoryBehaviour, "UserServiceActor")
+    context.watch(userServiceActor)
 
-    new UserRoutes(new UserHandler(userRegistryActor)(context.system))
+    new UserRoutes(new UserHandler(userServiceActor)(context.system))
   }
 }
