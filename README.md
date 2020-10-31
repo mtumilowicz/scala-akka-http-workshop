@@ -90,6 +90,27 @@
                 throughput = 100
             }
             ```
+* An Actor is given by the combination of a Behavior and a context in which this behavior is executed
+    * ActorContext
+        * An ActorContext in addition provides access to the Actor’s own identity ("self"), the ActorSystem 
+        it is part of, methods for querying the list of child Actors it created, access to Terminated and timed 
+        message scheduling.
+        * context.spawn() creates a child actor
+        * system.spawn() creates top level
+    * Behavior
+        * The behavior of an actor defines how it reacts to the messages that it receives
+        ```
+        def apply(): Behavior[SayHello] =
+            Behaviors.setup { context => // typically used as the outer most behavior when spawning an actor
+                val greeter = context.spawn(HelloWorld(), "greeter")
+            
+                Behaviors.receiveMessage { message => // useful for when the context is already accessible by other means, like being wrapped in an [[setup]] or similar
+                    val replyTo = context.spawn(HelloWorldBot(max = 3), message.name)
+                    greeter ! HelloWorld.Greet(message.name, replyTo)
+                    Behaviors.same
+                }
+            }
+        ```
         
 # failure
 * actor provides two separate flows
