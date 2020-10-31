@@ -3,11 +3,11 @@
 * https://www.manning.com/books/akka-in-action
 * https://doc.akka.io/docs/akka-http/10.2.1/
 
-# preface
+## preface
 * https://github.com/mtumilowicz/scala213-functional-programming-collections-workshop (scala intro)
 * https://github.com/mtumilowicz/kotlin-functional-programming-actors-workshop (actors intro)
     
-# introduction
+## introduction
 * two ultimate goals during software development
     1. complexity has to stay as low as possible
     1. resources must be used efficiently while you scale the application
@@ -34,16 +34,11 @@
         
 ## constructs
 * ActorSystem
+    * is a hierarchical group of actors which share common configuration, e.g. dispatchers, deployments, 
+    remote capabilities and addresses
+    * entry point for creating or looking up actors.
     * actors can create other actors, but who creates the first one?
         * first thing that every Akka application does is create an ActorSystem
-    * The actor system can create so called top-level actors
-        * it’s a common pattern to create only one top-level actor for all actors in the application
-    * remoting and a journal for durability
-        * The ActorSystem is also the nexus for these support capabilities
-    * An ActorSystem returns an address to the created top-level actor instead of the actor itself. 
-        * This address is called an ActorRef
-        * The ActorRef can be used to send messages to the actor. 
-        * This makes sense when you think about the fact that the actor could be on another server.
     * You could compare the hierarchy of actors to a URL path structure.
         * ActorPath
         * Every actor has a name. 
@@ -51,25 +46,51 @@
         name
         * if you don’t provide a name, Akka generates one for you, but it’s a good idea to name all your actors
         * All actor references can be located directly by an actor path, absolute or relative.
-* ActorRef, mailbox, and actor
-    * Messages are sent to the actor’s ActorRef 
-    * Every actor has a mailbox—it’s a lot like a queue
-    * Messages sent to the ActorRef will be temporarily stored in the mailbox to be
-      processed later, one at a time, in the order they arrived
+* ActorRef
+    * immutable and serializable handle to an actor
+    * ActorSystem returns an address (ActorRef) to the created top-level actor instead of the actor itself
+    * can be used to send messages to the actor
+    * makes sense - actor could be on another server
     * overview: ActorRef -> Mailbox -> Actor
 * Dispatchers
+    * In the real world, dispatchers are the communication coordinators responsible for receiving and passing 
+    messages. 
+        * For example, with emergency services like 911, the dispatchers are the people responsible for taking 
+        in the call and passing on the messages to the other departments like the medical, fire station, 
+        police, etc. 
+    * are said to be the main engine of an ActorSystem
+    * are responsible for selecting an actor and it’s messages and assigning them the CPU
+        * actors are lightweight because they run on top of dispatchers
+            * the actors aren’t necessarily directly proportional to the number of threads
+            * actors take a lot less space than threads: around 2.7 million actors can fit in 1 GB of memory. 
+            * That’s a big difference compared to 4096 threads for 1 GB of memory
+    * Every ActorSystem will have a default dispatcher that will be used in case nothing else is configured 
     * actors are invoked at some point by a dispatcher
         * dispatcher pushes the messages in the mailbox through the actors
-    * when you send a message to an actor, all you’re really doing is leaving a message behind in its mailbox 
-        * eventually a dispatcher will push it through the actor
-    * actors are lightweight because they run on top of dispatchers
-        * the actors aren’t necessarily directly proportional to the number of threads
-        * actors take a lot less space than threads: around 2.7 million actors can fit in 1 GB of memory. 
-        * That’s a big difference compared to 4096 threads for 1 GB of memory
-* how do Akka actors communicate with each other across the network? 
-    * ActorRefs are essentially addresses to actors, so all you need to change is how the addresses are
-    linked to actors
-
+    * context.spawn(yourBehavior, "DispatcherFromConfig", DispatcherSelector.fromConfig("your-dispatcher"))
+        * custom dispatcher from configuration and relies on this being in your application.conf:
+            ```
+            my-dispatcher {
+                # Dispatcher is the name of the event-based dispatcher
+                type = Dispatcher
+                # What kind of ExecutionService to use
+                executor = "fork-join-executor"
+                # Configuration for the fork join pool
+                fork-join-executor {
+                    # Min number of threads to cap factor-based parallelism number to
+                    parallelism-min = 2
+                    # Parallelism (threads) ... ceil(available processors * factor)
+                    parallelism-factor = 2.0
+                    # Max number of threads to cap factor-based parallelism number to
+                    parallelism-max = 10
+                }
+                # Throughput defines the maximum number of messages to be
+                # processed per actor before the thread jumps to the next actor.
+                # Set to 1 for as fair as possible.
+                throughput = 100
+            }
+            ```
+        
 # failure
 * actor provides two separate flows
     * one for normal logic
