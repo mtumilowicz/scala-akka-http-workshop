@@ -46,6 +46,8 @@
         name
         * if you don’t provide a name, Akka generates one for you, but it’s a good idea to name all your actors
         * All actor references can be located directly by an actor path, absolute or relative.
+    * is a heavyweight structure that will allocate threads, so create one per logical application
+        * Typically one ActorSystem per JVM process.
 * ActorRef
     * immutable and serializable handle to an actor
     * ActorSystem returns an address (ActorRef) to the created top-level actor instead of the actor itself
@@ -119,11 +121,10 @@
     * one for fault recovery logic
         * consists of actors that monitor the actors in the normal flow
 * instead of catching exceptions in an actor, we’ll just let the actor crash
-* The actor code for handling messages only contains normal processing logic and no error han-
-  dling or fault recovery logic, so it’s effectively not part of the recovery process, which
-  keeps things much clearer
-* The mailbox for a crashed actor is suspended until the
-  supervisor in the recovery flow has decided what to do with the exception
+* actor code for handling messages only contains normal processing logic and no error handling or fault recovery logic
+    * it’s effectively not part of the recovery process, which keeps things much clearer
+* The mailbox for a crashed actor is suspended until the supervisor in the recovery flow has decided 
+what to do with the exception
 * How does an actor become a supervisor? 
     * Akka has chosen to enforce parental supervision, meaning that any actor that creates 
     actors automatically becomes the supervisor of those actors.
@@ -146,23 +147,16 @@
     * Escalate
         * The supervisor doesn’t know what to do with it and escalates the problem to its parent, 
         which is also a supervisor.
-* in most cases, you don’t want to reprocess a message, because it probably caused the
-  error in the first place
-  * An example of that would be the case of the logProcessor
-    encountering a corrupt file: reprocessing corrupt files could end up in what’s called a
-    poisoned mailbox—no other message will ever get processed because the corrupting
-    message is failing over and over again
-  * For this reason, Akka chooses not to provide
-   the failing message to the mailbox again after a restart, but there’s a way to do this
-   yourself if you’re absolutely sure that the message didn’t cause the error
-# testing
-* An actor hides its internal state and doesn’t allow access to this state
-    * Calling a method
-      on an actor and checking its state, which is something you’d like to be able to
-      do when unit testing, is prevented by design
+* in most cases, you don’t want to reprocess a message, because it probably caused the error in the first place
+    * For this reason, Akka chooses not to provide
+     the failing message to the mailbox again after a restart, but there’s a way to do this
+     yourself if you’re absolutely sure that the message didn’t cause the error
 
-## 4.2 Actor lifecycle
-* An actor is automatically started by Akka when it’s created. 
+## actor lifecycle
+* actors do not stop automatically when no longer referenced, every Actor that is created must also explicitly 
+be destroyed. 
+    * The only simplification is that stopping a parent Actor will also recursively stop all the child Actors that this parent has created.
+* actor is automatically started by Akka when it’s created
 * The actor will stay in the Started state until it’s stopped, at which point the actor is in the Terminated state
 * When the actor is terminated, it can’t process messages anymore and will be eventually garbage collected
 * When the actor is in a Started state, it can be restarted to reset the internal state of the actor
@@ -170,44 +164,17 @@
     * The actor is created and started—for simplicity we’ll refer to this as the start event.
     * The actor is restarted on the restart event.
     * The actor is stopped by the stop event.
+        * A stopped actor is disconnected from its ActorRef
+        * After the actor is stopped, the
+          ActorRef is redirected to the deadLettersActorRef of the actor system, which is a
+          special ActorRef that receives all messages that are sent to dead actors.
 * There are several hooks in place in the Actor trait, which are called when the events
   happen to indicate a lifecycle change
   * You can add some custom code in these hooks
     that can be used to re-create a specific state in the fresh actor instance, for example, to
     process the message that failed before the restart, or to clean up some resources
-  * The order in which the hooks occur is guaranteed, although they’re
-    called asynchronously by Akka.
-* 4.2.1 Start event
-    * An actor is created and automatically started with the actorOf method
-    * Top-level actors are created with the actorOf method on the ActorSystem
-    * A parent actor creates a child actor using the actorOf on its ActorContext
-    * After the instance is created, the actor will be started by Akka. 
-    * The preStart hook is called just before the actor is started.
-* 4.2.2 Stop event
-    * The stop event indicates the end of the actor
-      lifecycle and occurs once, when an actor is
-      stopped
-    * An actor can be stopped using
-      the stop method on the ActorSystem and
-      ActorContext objects, or by sending a
-      PoisonPill message to an actor
-    * The postStop hook is called just before the actor is terminated. 
-        * possibly stores the last state of the
-          actor somewhere outside of the actor in the case that the next actor instance needs it
-    * When the actor is in the Terminated state, the actor doesn’t get any new messages to handle.
-    * A stopped actor is disconnected from its ActorRef
-    * After the actor is stopped, the
-      ActorRef is redirected to the deadLettersActorRef of the actor system, which is a
-      special ActorRef that receives all messages that are sent to dead actors.
 * 4.2.3 Restart event
-    * During the lifecycle of an actor, it’s possible that its supervisor will decide that the
-      actor has to be restarted.
-    * This event is more complex than the start or stop events,
-      because the instance of an actor is replaced
-    * When a restart occurs, the preRestart method of the crashed actor instance is called.
-        * In this hook, the crashed actor instance is able to store its current state, just before it’s
-          replaced by the new actor instance.
-    * Be careful when overriding this hook. 
+    * preRestart - be careful when overriding this hook. 
         * The default implementation of the preRestart method stops all the child actors of the actor 
         and then calls the postStop hook.
         * If you forget to call super.preRestart , this default behavior won’t occur
@@ -222,15 +189,6 @@
         was using before the fault
         * A stopped actor is disconnected from its ActorRef and
           redirected to the deadLettersActorRef as described by the stop event
-      * What both
-        the stopped actor and the crashed actor have in common is that by default, the post-
-        Stop is called after they’ve been cut off from the actor system.
-    * The solution in that case could be to
-      send the failed Row message to the self ActorRef so it would be processed by the
-      fresh actor instance
-      * One issue to note with this approach is that by sending a message
-        back onto the mailbox, the order of the messages on the mailbox is changed
-* 4.2.4 Putting the lifecycle pieces together
 * 4.2.5 Monitoring the lifecycle
     * The lifecycle ends when the actor is terminated. 
         * An actor is terminated
@@ -243,19 +201,8 @@
     * The crashed actor instance in a restart isn’t terminated in this sense
         * This is because the ActorRef will continue to live on after the restart; 
         * the actor instance hasn’t been terminated, but replaced by a new one
-    * The ActorContext provides a watch method to monitor the death of an actor and an unwatch to 
-    de-register as monitor. 
-        * Once an actor calls the watch method on an actor reference, it becomes the monitor of that actor reference.
-        * A Terminated message is sent to the monitor actor when the monitored actor is terminated.
-        * The Terminated message only contains the ActorRef of the actor that died
-    * The fact that the crashed actor instance in a restart isn’t terminated in the same way
-      as when an actor is stopped now makes sense, because otherwise you’d receive many
-      terminated messages whenever an actor restarts, which would make it impossible to
-      differentiate the final death of an actor from a temporary restart
-    * As opposed to supervision, which is only possible from parent to child actors, monitor-
-      ing can be done by any actor
-## 4.3 Supervision
-* 4.3.1 Supervisor hierarchy
+## supervision
+*  hierarchy
     * every actor that creates another is the supervisor of the created child actor
     * The supervision hierarchy is fixed for the lifetime of a child actor
         * there’s no such thing as adoption in Akka
@@ -263,9 +210,6 @@
       down the hierarchy as possible
       * When a fault occurs in the top level of the actor system, it could restart all the
         top-level actors or even shut down the actor system.
-    * If an actor instance were to be
-      stopped, the ActorRef would refer to the system’s deadLetters , which would break
-      the application
 * 4.3.2 Predefined strategies
     * The top-level actors in an application are created under the /user path and supervised
       by the user guardian
@@ -273,54 +217,11 @@
       its children on any Exception , except when it receives internal exceptions that indicate
       that the actor was killed or failed during initialization, at which point it will stop the
       actor in question
-    * There are two predefined strategies available in the Supervisor-
-      Strategy object: the defaultStrategy and the stoppingStrategy
-        * The stopping strategy will stop any child that crashes on any Exception 
-    * Akka allows you to make a decision about the fate of the child actors in two ways: 
-        * all children share the same fate and the same recovery is applied to the lot, 
-        * or a decision is rendered and the remedy is applied only to the crashed actor
-        * In some cases you might want to stop only the child actor that failed
-        * In other cases you might want to stop all child actors if one of them fails, maybe because 
-        they all depend on a particular resource
-            * If an exception is thrown that indicates that the shared resource has failed
-              completely, it might be better to immediately stop all child actors together instead of
-              waiting for this to happen individually for every child
-    * The OneForOneStrategy deter-
-      mines that child actors won’t share the same fate: only the crashed child will be
-      decided upon by the Decider 
-    * The other option is to use an AllForOneStrategy ,
-      which uses the same decision for all child actors even if only one crashed
     * Any Throwable that isn’t handled by the supervisor strategy
       will be escalated to the parent of the supervisor
-    * If a fatal error reaches all the way up
-      to the user guardian, the user guardian won’t handle it, since the user guardian uses
-      the default strategy
-      * an uncaught exception handler in the actor system causes the actor system to shut down
-      * In most cases it’s good practice not to handle
-        fatal errors in supervisors, but instead gracefully shut down the actor system, since a
-        fatal error can’t be recovered from
-* 4.3.3 Custom strategies
-    * there are four different types of actions a supervisor can take to resolve a crashed actor
-        * Resume the child, ignore errors, and keep processing with the same actor instance.
-        * Restart the child, remove the crashed actor instance, and replace it with a fresh actor instance.
-        * Stop the child and terminate the child permanently.
-        * Escalate the failure and let the parent actor decide what action needs to be taken.
-    * The OneForOneStrategy and AllForOneStrategy will continue indefinitely by
-      default. 
-      * Both strategies have default values for the constructor arguments maxNrOfRetries and withinTimeRange
-      ```
-      override def supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 5, withinTimeRange = 60 seconds) {
-        case _: DbBrokenConnectionException => Restart
-      }
-      ```
-      Escalates the issue if the problem hasn’t been resolved within 60 seconds or it has failed to be 
-      solved within five restarts
-    * It’s important to note that there’s no delay between restarts; the actor
-      will be restarted as fast as possible
-        * This BackOfSupervisor creates the actor
-          from the Props and supervises it, and does use a delay mechanism to prevent
-          fast restarts.
-          
+    * In most cases it’s good practice not to handle
+      fatal errors in supervisors, but instead gracefully shut down the actor system, since a
+      fatal error can’t be recovered from
           
 # akka http
 * The Akka HTTP modules implement a full server- and client-side HTTP stack on top of akka-actor and akka-stream
