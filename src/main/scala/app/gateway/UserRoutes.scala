@@ -6,11 +6,10 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import app.gateway.in.{NewUserApiInput, ReplaceUserApiInput}
 import com.typesafe.config.ConfigFactory
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import app.infrastructure.JsonFormats._
 
 class UserRoutes(userHandler: UserHandler) {
-
-  import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-  import app.infrastructure.JsonFormats._
 
   private val resources = ConfigFactory.load()
 
