@@ -28,8 +28,8 @@ class UserRoutes(userHandler: UserHandler) {
                     port = resources.getInt("my-app.server.port"),
                     path = s"/users/${user.id}"
                   )
-                  val host = Location(uri)
-                  complete((StatusCodes.Created, Seq(host), user))
+                  val location = Location(uri)
+                  complete(StatusCodes.Created, Seq(location), user)
                 }
                 }
               }

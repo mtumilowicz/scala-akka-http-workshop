@@ -10,7 +10,7 @@ import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import app.domain.UserId
 import app.gateway.in.{NewUserApiInput, ReplaceUserApiInput}
 import app.gateway.out.{UserApiOutput, UsersApiOutput}
-import app.gateway.{UserHandler, UserHandlerWorkshop, UserRoutes, UserRoutesWorkshop}
+import app.gateway.{UserHandlerWorkshop, UserRoutesWorkshop}
 import app.infrastructure.JsonFormatsWorkshop._
 import app.infrastructure.UserServiceConfiguration
 import org.scalatest.concurrent.ScalaFutures

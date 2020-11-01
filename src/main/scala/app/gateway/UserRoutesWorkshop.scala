@@ -11,54 +11,23 @@ import com.typesafe.config.ConfigFactory
 
 class UserRoutesWorkshop(userHandler: UserHandlerWorkshop) {
 
-  val userRoutes: Route =
+  val userRoutes: Route = {
     pathPrefix("users") {
       concat(
         pathEnd {
           concat(
-            get {
-              complete(userHandler.getUsers())
-            },
-            post {
-              entity(as[NewUserApiInput]) { user =>
-                onSuccess(userHandler.createUser(user.toDomain)) { user => {
-                  val uri = Uri.from(
-                    scheme = "http",
-                    host = resources.getString("my-app.server.host"),
-                    port = resources.getInt("my-app.server.port"),
-                    path = s"/users/${user.id}"
-                  )
-                  val host = Location(uri)
-                  complete((StatusCodes.Created, Seq(host), user))
-                }
-                }
-              }
-            })
+            // hint: get, complete, userHandler
+            // hint: post, entity, as, userHandler, Location, complete(status, headers, entity)
+          )
         },
         path(Segment) { id =>
           concat(
-            get {
-              onSuccess(userHandler.getUserById(id)) {
-                case Some(value) => complete(value)
-                case None => complete(StatusCodes.NotFound, s"user with given id: $id not found")
-              }
-            },
-            delete {
-              onSuccess(userHandler.deleteUserById(id)) {
-                case Some(value) => complete(value)
-                case None => complete(StatusCodes.NotFound, s"user with given id: $id not found")
-              }
-            },
-            put {
-              entity(as[ReplaceUserApiInput]) { user =>
-                onSuccess(userHandler.replaceUser(user.toDomain(id))) {
-                  case Some(value) => complete(value)
-                  case None => complete(StatusCodes.NotFound, s"user with given id: $id not found")
-                }
-              }
-            }
+            // get, onSuccess, userHandler, exhaustive, complete(status, message)
+            // delete, onSuccess, userHandler, exhaustive, complete(status, message)
+            // put, entity, as, onSuccess, userHandler, exhaustive, complete(status, message)
           )
         })
     }
+  }
   private val resources = ConfigFactory.load()
 }
