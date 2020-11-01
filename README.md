@@ -15,6 +15,8 @@
     1. UserRoutesWorkshop
     1. RoutesConfig
     1. UserServiceConfiguration
+    1. run UserRoutesSpecWorkshop
+    1. run App using workshop config and test it manually
     
 ## introduction
 * two ultimate goals during software development
