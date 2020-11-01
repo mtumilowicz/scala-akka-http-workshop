@@ -3,7 +3,7 @@ package answers.app.infrastructure
 import answers.app.domain._
 
 class UserInMemoryRegistry(private val map: Map[UserId, User] = Map())
-extends UserRegistry {
+  extends UserRegistry {
 
   def findAll: Users = Users(map.values.toSeq)
 

@@ -5,8 +5,8 @@ import answers.app.domain.{UserService, UserServiceProtocol}
 
 object UserServiceConfiguration {
 
-  def inMemoryService: UserService = new UserService(new UserInMemoryRegistry())
-
   def inMemoryBehaviour: Behavior[UserServiceProtocol.Command] = UserServiceProtocol(inMemoryService)
+
+  def inMemoryService: UserService = new UserService(new UserInMemoryRegistry())
 
 }

@@ -6,6 +6,7 @@ import app.gateway.out.{UserApiOutput, UsersApiOutput}
 import spray.json.DefaultJsonProtocol
 
 object JsonFormats {
+
   import DefaultJsonProtocol._
 
   implicit val newUserApiInputJsonFormat = jsonFormat2(NewUserApiInput)

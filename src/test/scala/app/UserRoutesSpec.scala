@@ -3,6 +3,7 @@ package app
 import java.util.concurrent.TimeUnit
 
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
@@ -10,6 +11,7 @@ import app.domain.UserId
 import app.gateway.in.{NewUserApiInput, ReplaceUserApiInput}
 import app.gateway.out.{UserApiOutput, UsersApiOutput}
 import app.gateway.{UserHandler, UserRoutes}
+import app.infrastructure.JsonFormats._
 import app.infrastructure.UserServiceConfiguration
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpec}
@@ -23,15 +25,11 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
   implicit def typedSystem = testKit.system
 
   implicit val routeTestTimeout = RouteTestTimeout(Duration(5, TimeUnit.SECONDS))
+  lazy val routes = new UserRoutes(new UserHandler(userRegistry)).userRoutes
+  val userRegistry = testKit.spawn(UserServiceConfiguration.inMemoryBehaviour)
 
   override def createActorSystem(): akka.actor.ActorSystem =
     testKit.system.classicSystem
-
-  val userRegistry = testKit.spawn(UserServiceConfiguration.inMemoryBehaviour)
-  lazy val routes = new UserRoutes(new UserHandler(userRegistry)).userRoutes
-
-  import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-  import app.infrastructure.JsonFormats._
 
   "UserRoutes" should {
     "return no users if no present" in {
@@ -133,22 +131,22 @@ class UserRoutesSpec extends WordSpec with Matchers with ScalaFutures with Scala
 
     "update existing user" in {
       //      given
-        val id = createUser().id
-        val userPut = ReplaceUserApiInput("Kapi2", 123)
-        val userEntity = Marshal(userPut).to[MessageEntity].futureValue
+      val id = createUser().id
+      val userPut = ReplaceUserApiInput("Kapi2", 123)
+      val userEntity = Marshal(userPut).to[MessageEntity].futureValue
 
-        //        when
-        val requestPut = Put(uri = "/users/" + id).withEntity(userEntity)
+      //        when
+      val requestPut = Put(uri = "/users/" + id).withEntity(userEntity)
 
-        //        then
-        requestPut ~> routes ~> check {
-          status should ===(StatusCodes.OK)
+      //        then
+      requestPut ~> routes ~> check {
+        status should ===(StatusCodes.OK)
 
-          val outputPut = entityAs[UserApiOutput]
-          outputPut.id should be(id)
-          outputPut.name should be("Kapi2")
-          outputPut.age should be(123)
-        }
+        val outputPut = entityAs[UserApiOutput]
+        outputPut.id should be(id)
+        outputPut.name should be("Kapi2")
+        outputPut.age should be(123)
+      }
     }
 
     "update not existing user" in {

@@ -4,7 +4,7 @@ import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.util.Timeout
 import answers.app.domain.UserServiceProtocol._
-import answers.app.domain.{NewUserInput, ReplaceUserInput, User, UserId, UserServiceProtocol}
+import answers.app.domain._
 import answers.app.gateway.out.{UserApiOutput, UserApiOutputBuilder, UsersApiOutput, UsersApiOutputBuilder}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,6 +20,7 @@ class UserHandler(userRegistry: ActorRef[UserServiceProtocol.Command])(implicit 
 
   def getUserById(id: String): Future[Option[UserApiOutput]] = {
     def toOutput: Option[User] => Option[UserApiOutput] = _.map(UserApiOutputBuilder.fromDomain)
+
     userRegistry.ask(GetUserById(UserId(id), _)).map(toOutput)
   }
 
@@ -28,6 +29,7 @@ class UserHandler(userRegistry: ActorRef[UserServiceProtocol.Command])(implicit 
 
   def replaceUser(input: ReplaceUserInput): Future[Option[UserApiOutput]] = {
     def toOutput: Option[User] => Option[UserApiOutput] = _.map(UserApiOutputBuilder.fromDomain)
+
     userRegistry.ask(ReplaceUser(input, _)).map(toOutput)
   }
 

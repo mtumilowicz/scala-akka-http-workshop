@@ -1,17 +1,15 @@
 package app.gateway
 
-import akka.http.scaladsl.model.{StatusCodes, Uri}
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.headers.Location
+import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import app.gateway.in.{NewUserApiInput, ReplaceUserApiInput}
-import com.typesafe.config.ConfigFactory
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import app.infrastructure.JsonFormats._
+import com.typesafe.config.ConfigFactory
 
 class UserRoutes(userHandler: UserHandler) {
-
-  private val resources = ConfigFactory.load()
 
   val userRoutes: Route =
     pathPrefix("users") {
@@ -62,4 +60,5 @@ class UserRoutes(userHandler: UserHandler) {
           )
         })
     }
+  private val resources = ConfigFactory.load()
 }
