@@ -6,17 +6,25 @@
     * https://medium.com/akka-for-newbies/actor-lifecycle-94b05bd2f600
 
 ## preface
-* https://github.com/mtumilowicz/scala213-functional-programming-collections-workshop (scala intro)
-* https://github.com/mtumilowicz/kotlin-functional-programming-actors-workshop (actors intro)
+* may be worthwhile to first look on the previous workshops
+    * scala basics: https://github.com/mtumilowicz/scala213-functional-programming-collections-workshop
+    * actors basics: https://github.com/mtumilowicz/kotlin-functional-programming-actors-workshop
+* goals of this workshops
+    * introduction to actors in akka context
+        * ActorSystem, ActorContext, ActorRef, Dispatchers, Behavior
+        * supervision and failure handling
+        * lifecycle
+    * introduction to akka http
+        * routing and marshalling
 * workshop plan:
-    1. UserServiceProtocolWorkshop
-    1. UserHandlerWorkshop
-    1. JsonFormatsWorkshop
-    1. UserRoutesWorkshop
-    1. RoutesConfig
-    1. UserServiceConfiguration
-    1. run UserRoutesSpecWorkshop
-    1. run App using workshop config and test it manually
+    1. `UserServiceProtocolWorkshop`
+    1. `UserHandlerWorkshop`
+    1. `JsonFormatsWorkshop`
+    1. `UserRoutesWorkshop`
+    1. `RoutesConfig`
+    1. `UserServiceConfiguration`
+    1. run `UserRoutesSpecWorkshop`
+    1. run `App` using workshop config and test it manually using Insomnia
     
 ## introduction
 * two ultimate goals during software development
@@ -233,7 +241,7 @@
         * marshallers are pulled in implicitly using the "magnet" pattern
             * you can use any kind of object as long as there is an implicit marshaller available in scope
             * http://spray.io/blog/2012-12-13-the-magnet-pattern/ 
-* Timeouts
+* timeouts
     * idle-timeout - if a connection is open but no request/response is being written to it for over idle-timeout time, 
     the connection will be automatically closed.
     * request timeouts - limits the maximum time it may take to produce an HttpResponse from a route
