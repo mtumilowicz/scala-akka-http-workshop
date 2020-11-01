@@ -29,78 +29,73 @@
     * interface
         * nothing is shared between actors
         * information is passed in messages
-    * system built out of components coupled on all three axes can only exist on
-      one runtime and will fail completely if one of its components fails
+    * if system coupled on all three axes can only exist on one runtime and will fail completely if 
+    one of its components fails
         
 ## constructs
 * ActorSystem
-    * is a hierarchical group of actors which share common configuration, e.g. dispatchers, deployments, 
-    remote capabilities and addresses
-    * entry point for creating or looking up actors.
     * actors can create other actors, but who creates the first one?
         * first thing that every Akka application does is create an ActorSystem
-    * You could compare the hierarchy of actors to a URL path structure.
-        * ActorPath
-        * Every actor has a name. 
-        * This name needs to be unique per level in the hierarchy: two sibling actors can’t have the same 
-        name
-        * if you don’t provide a name, Akka generates one for you, but it’s a good idea to name all your actors
-        * All actor references can be located directly by an actor path, absolute or relative.
+    * typically one ActorSystem per JVM process
+    * hierarchical group of actors which share common configuration
+        * similar to URL path structure
+            * ActorPath - unique path to an actor that shows the creation path up through the actor tree to the 
+            root actor
+            * every actor has a name (unique per level in the hierarchy)
+                * generated automatically, but it’s a good idea to name all your actors
+    * entry point for creating or looking up actors
     * is a heavyweight structure that will allocate threads, so create one per logical application
-        * Typically one ActorSystem per JVM process.
 * ActorRef
-    * immutable and serializable handle to an actor
     * ActorSystem returns an address (ActorRef) to the created top-level actor instead of the actor itself
+        * makes sense - actor could be on another server
     * can be used to send messages to the actor
-    * makes sense - actor could be on another server
-    * overview: ActorRef -> Mailbox -> Actor
+    * message -> ActorRef -> Mailbox -> Actor
 * Dispatchers
-    * In the real world, dispatchers are the communication coordinators responsible for receiving and passing 
-    messages. 
-        * For example, with emergency services like 911, the dispatchers are the people responsible for taking 
+    * in the real world, dispatchers are the communication coordinators responsible for receiving and passing 
+    messages 
+        * for example, emergency services 911 - the dispatchers are the people responsible for taking 
         in the call and passing on the messages to the other departments like the medical, fire station, 
-        police, etc. 
-    * are said to be the main engine of an ActorSystem
-    * are responsible for selecting an actor and it’s messages and assigning them the CPU
+        police, etc 
+    * the main engine of an ActorSystem
+    * responsible for selecting an actor and it’s messages and assigning them the CPU
         * actors are lightweight because they run on top of dispatchers
-            * the actors aren’t necessarily directly proportional to the number of threads
-            * actors take a lot less space than threads: around 2.7 million actors can fit in 1 GB of memory. 
-            * That’s a big difference compared to 4096 threads for 1 GB of memory
-    * Every ActorSystem will have a default dispatcher that will be used in case nothing else is configured 
+            * actors aren’t proportional to the number of threads
+            * 2.7 million actors vs 4096 threads can fit in 1 GB
     * actors are invoked at some point by a dispatcher
         * dispatcher pushes the messages in the mailbox through the actors
-    * context.spawn(yourBehavior, "DispatcherFromConfig", DispatcherSelector.fromConfig("your-dispatcher"))
-        * custom dispatcher from configuration and relies on this being in your application.conf:
-            ```
-            my-dispatcher {
-                # Dispatcher is the name of the event-based dispatcher
-                type = Dispatcher
-                # What kind of ExecutionService to use
-                executor = "fork-join-executor"
-                # Configuration for the fork join pool
-                fork-join-executor {
-                    # Min number of threads to cap factor-based parallelism number to
-                    parallelism-min = 2
-                    # Parallelism (threads) ... ceil(available processors * factor)
-                    parallelism-factor = 2.0
-                    # Max number of threads to cap factor-based parallelism number to
-                    parallelism-max = 10
-                }
-                # Throughput defines the maximum number of messages to be
-                # processed per actor before the thread jumps to the next actor.
-                # Set to 1 for as fair as possible.
-                throughput = 100
+    * configuring custom dispatcher
+        ```
+        context.spawn(yourBehavior, "DispatcherFromConfig", DispatcherSelector.fromConfig("your-dispatcher"))
+        ```
+        and `application.conf`
+        ```
+        my-dispatcher {
+            # Dispatcher is the name of the event-based dispatcher
+            type = Dispatcher
+            # What kind of ExecutionService to use
+            executor = "fork-join-executor"
+            # Configuration for the fork join pool
+            fork-join-executor {
+                # Min number of threads to cap factor-based parallelism number to
+                parallelism-min = 2
+                # Parallelism (threads) ... ceil(available processors * factor)
+                parallelism-factor = 2.0
+                # Max number of threads to cap factor-based parallelism number to
+                parallelism-max = 10
             }
-            ```
-* An Actor is given by the combination of a Behavior and a context in which this behavior is executed
+            # Throughput defines the maximum number of messages to be
+            # processed per actor before the thread jumps to the next actor.
+            # Set to 1 for as fair as possible.
+            throughput = 100
+        }
+        ```
+* Actor = Behavior + Context (in which behavior is executed)
     * ActorContext
-        * An ActorContext in addition provides access to the Actor’s own identity ("self"), the ActorSystem 
-        it is part of, methods for querying the list of child Actors it created, access to Terminated and timed 
-        message scheduling.
-        * context.spawn() creates a child actor
-        * system.spawn() creates top level
+        * provides access to the Actor’s own identity ("self"), list of child actors, etc
+        * `context.spawn()` creates a child actor
+        * `system.spawn()` creates top level
     * Behavior
-        * The behavior of an actor defines how it reacts to the messages that it receives
+        * defines how actor reacts to the messages that it receives
         ```
         def apply(): Behavior[SayHello] =
             Behaviors.setup { context => // typically used as the outer most behavior when spawning an actor
@@ -113,25 +108,15 @@
                 }
             }
         ```
-        
-# failure
-* actor provides two separate flows
-    * one for normal logic
-        * consists of actors that handle normal messages
-    * one for fault recovery logic
-        * consists of actors that monitor the actors in the normal flow
-* instead of catching exceptions in an actor, we’ll just let the actor crash
-* actor code for handling messages only contains normal processing logic and no error handling or fault recovery logic
-    * it’s effectively not part of the recovery process, which keeps things much clearer
-* The mailbox for a crashed actor is suspended until the supervisor in the recovery flow has decided 
-what to do with the exception
-* How does an actor become a supervisor? 
-    * Akka has chosen to enforce parental supervision, meaning that any actor that creates 
-    actors automatically becomes the supervisor of those actors.
-    * A supervisor doesn’t “catch exceptions;” rather it decides what should happen with the
-      crashed actors that it supervises based on the cause of the crash
+## supervision
+* actor is the supervisor of the created child actor
+* supervision hierarchy is fixed for the lifetime of a child actor
+* actors that are most likely to crash should be as low down the hierarchy as possible
+    * when a fault occurs in the top level of the actor system, it could restart all the
+    top-level actors or even shut down the actor system.
 * The supervisor doesn’t try to fix the actor or its state. 
     * It simply renders a judgment on how to recover, and then triggers the corresponding strategy
+* mailbox for a crashed actor is suspended until the supervisor will decide what to do with the exception
 * The supervisor has four options when deciding what to do with the actor:
     * Restart
         * The actor must be re-created from its Props
@@ -146,11 +131,16 @@ what to do with the exception
         * It will no longer take part in processing messages.
     * Escalate
         * The supervisor doesn’t know what to do with it and escalates the problem to its parent, 
-        which is also a supervisor.
+        which is also a supervisor
+
+## failure
+* actor provides two separate flows
+    * one for normal logic - consists of actors that handle normal messages
+    * one for fault recovery logic - consists of actors that monitor the actors in the normal flow
+* instead of catching exceptions in an actor, we’ll just let the actor crash
+    * no error handling or fault recovery logic in actor
 * in most cases, you don’t want to reprocess a message, because it probably caused the error in the first place
-    * For this reason, Akka chooses not to provide
-     the failing message to the mailbox again after a restart, but there’s a way to do this
-     yourself if you’re absolutely sure that the message didn’t cause the error
+    * Akka chooses not to provide the failing message to the mailbox again after a restart
 
 ## actor lifecycle
 * actors do not stop automatically when no longer referenced, every Actor that is created must also explicitly 
@@ -201,31 +191,12 @@ be destroyed.
     * The crashed actor instance in a restart isn’t terminated in this sense
         * This is because the ActorRef will continue to live on after the restart; 
         * the actor instance hasn’t been terminated, but replaced by a new one
-## supervision
-*  hierarchy
-    * every actor that creates another is the supervisor of the created child actor
-    * The supervision hierarchy is fixed for the lifetime of a child actor
-        * there’s no such thing as adoption in Akka
-    * The most dangerous actors (actors that are most likely to crash) should be as low
-      down the hierarchy as possible
-      * When a fault occurs in the top level of the actor system, it could restart all the
-        top-level actors or even shut down the actor system.
-* 4.3.2 Predefined strategies
-    * The top-level actors in an application are created under the /user path and supervised
-      by the user guardian
-    * The default supervision strategy for the user guardian is to restart
-      its children on any Exception , except when it receives internal exceptions that indicate
-      that the actor was killed or failed during initialization, at which point it will stop the
-      actor in question
-    * Any Throwable that isn’t handled by the supervisor strategy
-      will be escalated to the parent of the supervisor
-    * In most cases it’s good practice not to handle
-      fatal errors in supervisors, but instead gracefully shut down the actor system, since a
-      fatal error can’t be recovered from
           
 # akka http
 * The Akka HTTP modules implement a full server- and client-side HTTP stack on top of akka-actor and akka-stream
 * The high-level, routing API of Akka HTTP provides a DSL to describe HTTP “routes” and how they should be handled
+    * The “Route” is the central concept of Akka HTTP’s Routing DSL
+        * type Route = RequestContext => Future[RouteResult]
 * Marshalling
     * Transforming request and response bodies between over-the-wire formats and objects to be used in your 
     application is done separately from the route declarations, in marshallers, which are pulled in implicitly 
@@ -247,12 +218,7 @@ be destroyed.
             ```
         * Request timeouts are a mechanism that limits the maximum time it may take to produce an HttpResponse from a route
             * If that deadline is not met the server will automatically inject a Service Unavailable HTTP response and close the connection to prevent it from leaking and staying around indefinitely (for example if by programming error a Future would never complete, never sending the real response otherwise).
-* Server API
-    * Akka HTTP also provides an embedded, Reactive-Streams-based, fully asynchronous HTTP/1.1 server implemented on top of Streams.
-    * The “Route” is the central concept of Akka HTTP’s Routing DSL
-        * type Route = RequestContext => Future[RouteResult]
-    * Generally when a route receives a request (or rather a RequestContext for it) it can do one of these things:
-        * Complete the request by returning the value of requestContext.complete(...)
-        * Reject the request by returning the value of requestContext.reject(...) (see Rejections)
-        * Fail the request by returning the value of requestContext.fail(...) or by just throwing an exception (see Exception Handling)
-        * Do any kind of asynchronous processing and instantly return a Future[RouteResult] to be eventually completed later
+* Akka HTTP also provides an embedded, Reactive-Streams-based, fully asynchronous HTTP/1.1 server implemented on top of Streams.
+* constructs
+    * Route
+    * Directive
