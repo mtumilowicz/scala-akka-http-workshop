@@ -185,6 +185,37 @@
             * simple abstract data type (ADT) that models the possible non-error results of a Route
             * Complete, Rejected
     * Directive
+        * a small building block used for creating route structures
+        * xxx
+            ```
+            val route: Route = { ctx => ctx.complete("yeah") } // standard way to build route
+            val route: Route = _.complete("yeah") // scala syntax
+            val route = complete("yeah") // complete directive
+            ```
+        * example
+            ```
+            val route: Route =
+              path("order" / IntNumber) { id =>
+                get {
+                  complete {
+                    "Received GET request for order " + id
+                  }
+                } ~
+                put {
+                  complete {
+                    "Received PUT request for order " + id
+                  }
+                }
+              }
+            ```
+    * PathMatcher
+        * mini-DSL is used to match incoming URL’s and extract values from them
+        * used in the path directive
+        * example
+            ```
+            // matches /foo/bar
+            path("foo" / "bar")
+            ```
 * marshalling and unmarshalling
     * marshalling - converting a higher-level (object) into lower-level representation, ex. a "wire format"
         * also called "serialization" or "pickling"
