@@ -174,6 +174,16 @@
         ```
         type Route = RequestContext => Future[RouteResult]
         ```
+        * when a route receives a request (RequestContext) it can do one of these things
+            1. requestContext.complete(...) - given response is sent to the client as reaction to the request
+            1. requestContext.reject(...) - route does not want to handle the request
+            1. requestContext.fail(...) - 
+        * RequestContext
+            * wraps an HttpRequest instance to enrich it with additional information that are typically required 
+            by the routing logic (ex. ExecutionContext)
+        * RouteResult
+            * simple abstract data type (ADT) that models the possible non-error results of a Route
+            * Complete, Rejected
     * Directive
 * marshalling and unmarshalling
     * marshalling - converting a higher-level (object) into lower-level representation, ex. a "wire format"
