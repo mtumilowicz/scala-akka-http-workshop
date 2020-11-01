@@ -1,7 +1,9 @@
 # scala-akka-http-actor-workshop
-* https://medium.com/se-notes-by-alexey-novakov/crud-microservice-with-akkahttp-c914059bcf9f
-* https://www.manning.com/books/akka-in-action
-* https://doc.akka.io/docs/akka-http/10.2.1/
+* references
+    * https://medium.com/se-notes-by-alexey-novakov/crud-microservice-with-akkahttp-c914059bcf9f
+    * https://www.manning.com/books/akka-in-action
+    * https://doc.akka.io/docs/akka-http/10.2.1/
+    * https://medium.com/akka-for-newbies/actor-lifecycle-94b05bd2f600
 
 ## preface
 * https://github.com/mtumilowicz/scala213-functional-programming-collections-workshop (scala intro)
@@ -108,6 +110,7 @@
                 }
             }
         ```
+      
 ## supervision
 * actor is the supervisor of the created child actor
 * supervision hierarchy is fixed for the lifetime of a child actor
@@ -143,82 +146,49 @@
     * Akka chooses not to provide the failing message to the mailbox again after a restart
 
 ## actor lifecycle
-* actors do not stop automatically when no longer referenced, every Actor that is created must also explicitly 
-be destroyed. 
-    * The only simplification is that stopping a parent Actor will also recursively stop all the child Actors that this parent has created.
+* actors do not stop automatically when no longer referenced
+    * every actor that is created must also explicitly be destroyed
+    * stopping a parent will also recursively stop all the child
 * actor is automatically started by Akka when it’s created
-* The actor will stay in the Started state until it’s stopped, at which point the actor is in the Terminated state
-* When the actor is terminated, it can’t process messages anymore and will be eventually garbage collected
-* When the actor is in a Started state, it can be restarted to reset the internal state of the actor
-* During the lifecycle of an actor, there are three types of events:
-    * The actor is created and started—for simplicity we’ll refer to this as the start event.
-    * The actor is restarted on the restart event.
-    * The actor is stopped by the stop event.
-        * A stopped actor is disconnected from its ActorRef
-        * After the actor is stopped, the
-          ActorRef is redirected to the deadLettersActorRef of the actor system, which is a
-          special ActorRef that receives all messages that are sent to dead actors.
-* There are several hooks in place in the Actor trait, which are called when the events
-  happen to indicate a lifecycle change
-  * You can add some custom code in these hooks
-    that can be used to re-create a specific state in the fresh actor instance, for example, to
-    process the message that failed before the restart, or to clean up some resources
-* 4.2.3 Restart event
-    * preRestart - be careful when overriding this hook. 
-        * The default implementation of the preRestart method stops all the child actors of the actor 
-        and then calls the postStop hook.
-        * If you forget to call super.preRestart , this default behavior won’t occur
-        * If the
-          children of the crashed actor aren’t stopped, you could end up with increasingly more
-          child actors when the parent actor is restarted.
-    * It’s important to note that a restart doesn’t stop the crashed actor in the same way
-      as the stop methods
-      * A crashed actor instance in a restart doesn’t cause a Terminated message to be sent for the crashed actor
-      * The fresh
-        actor instance, during restart, is connected to the same ActorRef the crashed actor
-        was using before the fault
-        * A stopped actor is disconnected from its ActorRef and
-          redirected to the deadLettersActorRef as described by the stop event
-* 4.2.5 Monitoring the lifecycle
-    * The lifecycle ends when the actor is terminated. 
-        * An actor is terminated
+* lifecycle: Started -> Stopped -> Terminated
+    * started - can be restarted to reset the internal state of the actor
+    * stopped - is disconnected from its ActorRef
+        * ActorRef is redirected to the deadLettersActorRef of the actor system (special ActorRef that receives all 
+        messages that are sent to dead actors)
+    * terminated - can’t process messages anymore and will be eventually garbage collected
             * if the supervisor decides to stop the actor
             * if the stop method is used to stop the actor
-            * if a PoisonPill message is sent to the actor, which indirectly causes the stop method to be called.
-        * Since the default implementa-
-          tion of the preRestart method stops all the actor’s children with the stop methods,
-          these children are also terminated in the case of a restart
-    * The crashed actor instance in a restart isn’t terminated in this sense
-        * This is because the ActorRef will continue to live on after the restart; 
-        * the actor instance hasn’t been terminated, but replaced by a new one
+            * if a PoisonPill message is sent to the actor
+                * indirectly causes the stop method to be called
+* there are several hooks, which are called when the events happen to indicate a lifecycle change
+    ![alt text](img/hooks.png)
+    * restart doesn’t stop the crashed actor in the same way as the stop methods
+        * during restart - fresh actor instance is connected to the same ActorRef the crashed actor
+        was using before the fault
+        * stopped actor is disconnected from its ActorRef and redirected to the deadLettersActorRef
           
 # akka http
-* The Akka HTTP modules implement a full server- and client-side HTTP stack on top of akka-actor and akka-stream
-* The high-level, routing API of Akka HTTP provides a DSL to describe HTTP “routes” and how they should be handled
-    * The “Route” is the central concept of Akka HTTP’s Routing DSL
-        * type Route = RequestContext => Future[RouteResult]
-* Marshalling
-    * Transforming request and response bodies between over-the-wire formats and objects to be used in your 
-    application is done separately from the route declarations, in marshallers, which are pulled in implicitly 
-    using the “magnet” pattern. 
-    * This means that you can complete a request with any kind of object as long as there is an implicit marshaller 
-    available in scope.
-    * Marshalling is the process of converting a higher-level (object) structure into some kind of lower-level 
-    representation, often a “wire format”. Other popular names for marshalling are “serialization” or “pickling”.
-* unmarshalling
-    * “Unmarshalling” is the process of converting some kind of a lower-level representation, often a “wire format”, into a higher-level (object) structure. Other popular names for it are “Deserialization” or “Unpickling”.
+* implements a full server/client-side HTTP stack on top of akka-actor and akka-stream
+* provides a DSL to describe HTTP "routes" and how they should be handled
+    * Route is the central concept of Akka HTTP’s Routing DSL
+        ```
+        type Route = RequestContext => Future[RouteResult]
+        ```
+* marshalling and unmarshalling
+    * marshalling - converting a higher-level (object) into lower-level representation, ex. a "wire format"
+        * also called "serialization" or "pickling"
+    * "unmarshalling" - reverse process to marshalling
+        * also called "deserialization" or "unpickling"
+    * is done separately from the route declarations
+        * marshallers are pulled in implicitly using the "magnet" pattern
+            * you can use any kind of object as long as there is an implicit marshaller available in scope
+            * http://spray.io/blog/2012-12-13-the-magnet-pattern/ 
 * Timeouts
-    * idle-timeout is a global setting which sets the maximum inactivity time of a given connection
-        * In other words, if a connection is open but no request/response is being written to it for over idle-timeout time, the connection will be automatically closed.
-            ```
-            akka.http.server.idle-timeout
-            akka.http.client.idle-timeout
-            akka.http.host-connection-pool.idle-timeout
-            akka.http.host-connection-pool.client.idle-timeout
-            ```
-        * Request timeouts are a mechanism that limits the maximum time it may take to produce an HttpResponse from a route
-            * If that deadline is not met the server will automatically inject a Service Unavailable HTTP response and close the connection to prevent it from leaking and staying around indefinitely (for example if by programming error a Future would never complete, never sending the real response otherwise).
-* Akka HTTP also provides an embedded, Reactive-Streams-based, fully asynchronous HTTP/1.1 server implemented on top of Streams.
+    * idle-timeout - if a connection is open but no request/response is being written to it for over idle-timeout time, 
+    the connection will be automatically closed.
+    * request timeouts - limits the maximum time it may take to produce an HttpResponse from a route
+        * if that deadline is not met the server will automatically inject a Service Unavailable HTTP response and 
+        close the connection to prevent it from leaking and staying around indefinitely
 * constructs
     * Route
     * Directive
