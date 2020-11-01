@@ -8,6 +8,13 @@
 ## preface
 * https://github.com/mtumilowicz/scala213-functional-programming-collections-workshop (scala intro)
 * https://github.com/mtumilowicz/kotlin-functional-programming-actors-workshop (actors intro)
+* workshop plan:
+    1. UserServiceProtocolWorkshop
+    1. UserHandlerWorkshop
+    1. JsonFormatsWorkshop
+    1. UserRoutesWorkshop
+    1. RoutesConfig
+    1. UserServiceConfiguration
     
 ## introduction
 * two ultimate goals during software development
