@@ -31,7 +31,7 @@ class UserRoutesSpecWorkshop extends WordSpec with Matchers with ScalaFutures wi
   override def createActorSystem(): akka.actor.ActorSystem =
     testKit.system.classicSystem
 
-  "UserRoutes" should {
+  "UserRoutes" ignore {
     "return no users if no present" in {
       //      when
       val request = HttpRequest(uri = "/users")
