@@ -23,7 +23,7 @@
     1. `UserRoutesWorkshop`
     1. `RoutesConfig`
     1. `UserServiceConfiguration`
-    1. run `UserRoutesSpecWorkshop`
+    1. run `UserRoutesSpecWorkshop`: change `"UserRoutes" ignore` -> `"UserRoutes" should`
     1. run `App` using workshop config and test it manually using Insomnia
     
 ## introduction
