@@ -24,7 +24,9 @@ class UserRoutes(userHandler: UserHandler) {
             post {
               entity(as[NewUserApiInput]) { user =>
                 onSuccess(userHandler.createUser(user.toDomain)) { user => {
-                  val uri = Uri.from(scheme = "http", host = resources.getString("my-app.server.host"),
+                  val uri = Uri.from(
+                    scheme = "http",
+                    host = resources.getString("my-app.server.host"),
                     port = resources.getInt("my-app.server.port"),
                     path = s"/users/${user.id}"
                   )
