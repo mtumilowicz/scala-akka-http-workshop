@@ -213,8 +213,7 @@
         * used in the path directive
         * example
             ```
-            // matches /foo/bar
-            path("foo" / "bar")
+            path("foo" / "bar") // matches /foo/bar
             ```
 * marshalling and unmarshalling
     * marshalling - converting a higher-level (object) into lower-level representation, ex. a "wire format"
