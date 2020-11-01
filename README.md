@@ -184,7 +184,7 @@
         was using before the fault
         * stopped actor is disconnected from its ActorRef and redirected to the deadLettersActorRef
           
-# akka http
+## akka http
 * implements a full server/client-side HTTP stack on top of akka-actor and akka-stream
 * provides a DSL to describe HTTP "routes" and how they should be handled
     * Route is the central concept of Akka HTTP’s Routing DSL
