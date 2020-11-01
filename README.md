@@ -174,6 +174,7 @@
         ```
         type Route = RequestContext => Future[RouteResult]
         ```
+    * Directive
 * marshalling and unmarshalling
     * marshalling - converting a higher-level (object) into lower-level representation, ex. a "wire format"
         * also called "serialization" or "pickling"
@@ -189,6 +190,3 @@
     * request timeouts - limits the maximum time it may take to produce an HttpResponse from a route
         * if that deadline is not met the server will automatically inject a Service Unavailable HTTP response and 
         close the connection to prevent it from leaking and staying around indefinitely
-* constructs
-    * Route
-    * Directive
