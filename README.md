@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.com/mtumilowicz/scala-akka-http-actor-workshop.svg?branch=master)](https://travis-ci.com/mtumilowicz/scala-akka-http-actor-workshop)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 # scala-akka-http-actor-workshop
 * references
     * https://medium.com/se-notes-by-alexey-novakov/crud-microservice-with-akkahttp-c914059bcf9f
