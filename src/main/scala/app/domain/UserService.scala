@@ -1,30 +1,23 @@
 package app.domain
 
-class UserService(registry: UserRegistry) {
+class UserService(repository: UserRepository) {
 
-  def findAll(): Users = registry.findAll
+  def findAll(): Users = repository.findAll
 
-  def save(input: NewUserInput): (User, UserRegistry) = registry.save(input)
+  def save(input: NewUserInput): User = repository.save(input)
 
-  def replace(input: ReplaceUserInput): (Option[User], UserRegistry) = {
+  def replace(input: ReplaceUserInput): Option[User] = {
     val user = User.createFrom(input)
-
-    val userOpt = registry.findById(user.id)
+    repository.findById(user.id)
       .map(_ => user)
-
-    (userOpt, userOpt
-      .map(registry.save)
-      .getOrElse(registry))
+      .map(repository.save)
   }
 
-  def findById(id: UserId): Option[User] = registry.findById(id)
+  def findById(id: UserId): Option[User] = repository.findById(id)
 
-  def deleteById(id: UserId): (Option[UserId], UserRegistry) = {
-    val userId = registry.findById(id)
+  def deleteById(id: UserId): Option[UserId] = {
+    repository.findById(id)
       .map(_.id)
-
-    (userId, userId
-      .map(registry.deleteById)
-      .getOrElse(registry))
+      .flatMap(repository.deleteById)
   }
 }
