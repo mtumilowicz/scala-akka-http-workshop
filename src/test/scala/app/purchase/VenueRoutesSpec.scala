@@ -28,7 +28,7 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
   implicit val routeTestTimeout = RouteTestTimeout(Duration(5, TimeUnit.SECONDS))
 
   val venueService = VenueConfig.inMemoryService()
-  val userService = UserConfig.inMemoryService
+  val userService = UserConfig.inMemoryService()
   val purchaseConfig = PurchaseConfig.service(userService, venueService)
   val venueActor = testKit.spawn(VenueConfig.actor(venueService).behavior())
   val purchaseActor = testKit.spawn(PurchaseConfig.actor(purchaseConfig).behavior())

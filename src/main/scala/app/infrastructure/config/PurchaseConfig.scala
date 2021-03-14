@@ -9,8 +9,8 @@ object PurchaseConfig {
 
   def inMemoryService(): PurchaseService =
     service(
-      userService = UserConfig.inMemoryService,
-      venueService = VenueConfig.inMemoryService
+      userService = UserConfig.inMemoryService(),
+      venueService = VenueConfig.inMemoryService()
     )
 
   def service(userService: UserService, venueService: VenueService): PurchaseService =

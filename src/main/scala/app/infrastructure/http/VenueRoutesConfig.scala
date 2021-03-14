@@ -8,7 +8,7 @@ object VenueRoutesConfig {
 
   def config(context: ActorContext[Nothing]): VenueRoutes = {
     val venueService = VenueConfig.inMemoryService()
-    val purchaseConfig = PurchaseConfig.service(UserConfig.inMemoryService, venueService)
+    val purchaseConfig = PurchaseConfig.service(UserConfig.inMemoryService(), venueService)
     val venueActor = context.spawn(VenueConfig.actor(venueService).behavior(), "VenueActor")
     context.watch(venueActor)
     val purchaseActor = context.spawn(PurchaseConfig.actor(purchaseConfig).behavior(), "PurchaseActor")
