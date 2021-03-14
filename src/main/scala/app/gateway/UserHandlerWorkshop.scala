@@ -3,8 +3,9 @@ package app.gateway
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.util.Timeout
-import app.domain.UserServiceProtocolWorkshop._
+import app.domain.user.UserServiceProtocolWorkshop._
 import app.domain._
+import app.domain.user.UserServiceProtocolWorkshop
 import app.gateway.out.{UserApiOutput, UserApiOutputBuilder, UsersApiOutput, UsersApiOutputBuilder}
 
 import scala.concurrent.ExecutionContext.Implicits.global

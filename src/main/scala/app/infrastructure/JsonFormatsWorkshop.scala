@@ -1,6 +1,6 @@
 package app.infrastructure
 
-import app.domain.UserId
+import app.domain.user.UserId
 import app.gateway.in.{NewUserApiInput, ReplaceUserApiInput}
 import app.gateway.out.{UserApiOutput, UsersApiOutput}
 import spray.json.DefaultJsonProtocol

@@ -1,8 +1,10 @@
 package app.gateway.in
 
-import app.domain.{ReplaceUserInput, UserId}
+import app.domain.cash.NonNegativeAmount
+import app.domain._
+import app.domain.user.{ReplaceUserInput, UserId}
 
-case class ReplaceUserApiInput(name: String, age: Int) {
+case class ReplaceUserApiInput(name: String, budget: Int) {
   def toDomain(id: String): ReplaceUserInput =
-    ReplaceUserInput(UserId(id), name, age)
+    user.ReplaceUserInput(UserId(id), name, NonNegativeAmount(budget))
 }

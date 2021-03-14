@@ -1,6 +1,6 @@
 package app.gateway.out
 
-import app.domain.Users
+import app.domain.user.Users
 
 final case class UsersApiOutput(users: Seq[UserApiOutput])
 
