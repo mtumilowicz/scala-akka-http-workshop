@@ -9,7 +9,7 @@ import app.gateway.user.in.{NewUserApiInput, ReplaceUserApiInput}
 import app.gateway.user.out.{UserApiOutput, UsersApiOutput}
 import app.gateway.user.{UserHandler, UserRoutes}
 import app.infrastructure.config.UserConfig
-import app.infrastructure.http.JsonFormats._
+import app.infrastructure.http.user.UserJsonFormats._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec

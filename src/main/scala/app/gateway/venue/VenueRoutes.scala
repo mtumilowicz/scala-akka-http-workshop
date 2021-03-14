@@ -14,7 +14,7 @@ import app.gateway.venue.out.{VenueApiOutput, VenueApiOutputBuilder}
 import app.infrastructure.actor.PurchaseActor.Purchase
 import app.infrastructure.actor.VenueActor._
 import app.infrastructure.actor.{PurchaseActor, VenueActor}
-import app.infrastructure.http.JsonFormats._
+import app.infrastructure.http.venue.VenueJsonFormats._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
