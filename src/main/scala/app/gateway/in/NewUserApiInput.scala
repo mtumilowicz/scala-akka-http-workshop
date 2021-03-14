@@ -1,7 +1,9 @@
 package app.gateway.in
 
-import app.domain.NewUserInput
+import app.domain.cash.NonNegativeAmount
+import app.domain.user
+import app.domain.user.NewUserInput
 
-case class NewUserApiInput(name: String, age: Int) {
-  def toDomain: NewUserInput = NewUserInput(name, age)
+case class NewUserApiInput(name: String, budget: Int) {
+  def toDomain: NewUserInput = user.NewUserInput(name, NonNegativeAmount(budget))
 }

@@ -1,13 +1,11 @@
-package app
-
-import java.util.concurrent.TimeUnit
+package app.user
 
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
-import app.domain.UserId
+import app.domain.user.UserId
 import app.gateway.in.{NewUserApiInput, ReplaceUserApiInput}
 import app.gateway.out.{UserApiOutput, UsersApiOutput}
 import app.gateway.{UserHandlerWorkshop, UserRoutesWorkshop}
@@ -16,6 +14,7 @@ import app.infrastructure.UserServiceConfiguration
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpec}
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.Duration
 
 class UserRoutesSpecWorkshop extends WordSpec with Matchers with ScalaFutures with ScalatestRouteTest {
@@ -72,7 +71,7 @@ class UserRoutesSpecWorkshop extends WordSpec with Matchers with ScalaFutures wi
         val output = entityAs[UserApiOutput]
         output.id should not be (null)
         output.name should be("Kapi")
-        output.age should be(42)
+        output.budget should be(42)
 
         header("location").map(_.value()) should ===(Some(s"http://localhost:8080/users/${output.id}"))
       }
@@ -91,7 +90,7 @@ class UserRoutesSpecWorkshop extends WordSpec with Matchers with ScalaFutures wi
         val outputOfGet = entityAs[UserApiOutput]
         outputOfGet.id should be(id)
         outputOfGet.name should be("Kapi")
-        outputOfGet.age should be(42)
+        outputOfGet.budget should be(42)
       }
     }
 
@@ -145,7 +144,7 @@ class UserRoutesSpecWorkshop extends WordSpec with Matchers with ScalaFutures wi
         val outputPut = entityAs[UserApiOutput]
         outputPut.id should be(id)
         outputPut.name should be("Kapi2")
-        outputPut.age should be(123)
+        outputPut.budget should be(123)
       }
     }
 

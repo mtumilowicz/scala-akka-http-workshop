@@ -1,8 +1,8 @@
-package app.domain
+package app.domain.user
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
-import app.domain.UserActor._
+import app.domain.user.UserActor._
 
 class UserActor(userService: UserService) {
 

@@ -1,7 +1,7 @@
-package app.domain
+package app.domain.user
 
+import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorRef, Behavior}
 
 object UserServiceProtocolWorkshop {
 

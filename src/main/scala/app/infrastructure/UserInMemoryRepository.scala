@@ -1,13 +1,14 @@
 package app.infrastructure
 
-import app.domain._
+import app.domain.{user, _}
+import app.domain.user.{NewUserInput, User, UserId, UserRepository, Users}
 
 import scala.collection.mutable
 
 object UserInMemoryRepository extends UserRepository {
   val map: mutable.Map[UserId, User] = mutable.Map()
 
-  def findAll: Users = Users(map.values.toSeq)
+  def findAll: Users = user.Users(map.values.toSeq)
 
   def findById(id: UserId): Option[User] = map.get(id)
 
