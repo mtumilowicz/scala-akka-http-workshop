@@ -4,22 +4,16 @@ import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
-import app.domain.cash.NonNegativeAmount
-import app.domain.user.{User, UserId}
+import app.domain.user.UserId
 import app.gateway.user.in.{NewUserApiInput, ReplaceUserApiInput}
 import app.gateway.user.out.{UserApiOutput, UsersApiOutput}
 import app.gateway.user.{UserHandler, UserRoutes}
-import app.gateway.venue.VenueRoutes
-import app.gateway.venue.in.{BuyerIdApiInput, NewVenueApiInput}
-import app.gateway.venue.out.VenueApiOutput
-import app.infrastructure.config.{PurchaseConfig, UserConfig, VenueConfig}
+import app.infrastructure.config.UserConfig
 import app.infrastructure.http.JsonFormats._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.matchers.must.Matchers.be
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.Duration
 
@@ -30,7 +24,7 @@ class UserRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
   implicit def typedSystem = testKit.system
 
   implicit val routeTestTimeout = RouteTestTimeout(Duration(5, TimeUnit.SECONDS))
-  val userService = testKit.spawn(UserConfig.inMemoryBehaviour)
+  val userService = testKit.spawn(UserConfig.inMemoryBehaviour())
   lazy val routes = new UserRoutes(new UserHandler(userService)).userRoutes
 
   override def createActorSystem(): akka.actor.ActorSystem =
