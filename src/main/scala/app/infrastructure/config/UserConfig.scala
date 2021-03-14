@@ -1,9 +1,11 @@
-package app.infrastructure
+package app.infrastructure.config
 
 import akka.actor.typed.Behavior
 import app.domain.user.{UserRepository, UserService, UserServiceProtocolWorkshop}
+import app.infrastructure.actor.UserActor
+import app.infrastructure.repository.UserInMemoryRepository
 
-object UserServiceConfiguration {
+object UserConfig {
 
   def inMemoryBehaviour: Behavior[UserActor.UserCommand] = new UserActor(inMemoryService).behavior()
 

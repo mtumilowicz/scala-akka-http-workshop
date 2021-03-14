@@ -1,4 +1,4 @@
-package app.gateway.in
+package app.gateway.user.in
 
 import app.domain.cash.NonNegativeAmount
 import app.domain.user

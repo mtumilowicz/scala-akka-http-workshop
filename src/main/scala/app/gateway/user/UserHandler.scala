@@ -1,13 +1,13 @@
-package app.gateway
+package app.gateway.user
 
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.util.Timeout
 import app.domain.error.DomainError
-import app.infrastructure.UserActor._
 import app.domain.user._
-import app.gateway.out.{UserApiOutput, UserApiOutputBuilder, UsersApiOutput, UsersApiOutputBuilder}
-import app.infrastructure.UserActor
+import app.gateway.user.out.{UserApiOutput, UserApiOutputBuilder, UsersApiOutput, UsersApiOutputBuilder}
+import app.infrastructure.actor.UserActor
+import app.infrastructure.actor.UserActor._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

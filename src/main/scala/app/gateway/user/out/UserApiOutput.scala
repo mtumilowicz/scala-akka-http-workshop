@@ -1,4 +1,4 @@
-package app.gateway.out
+package app.gateway.user.out
 
 import app.domain.user.User
 

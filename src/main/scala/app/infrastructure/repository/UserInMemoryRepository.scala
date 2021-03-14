@@ -1,8 +1,8 @@
-package app.infrastructure
+package app.infrastructure.repository
 
+import app.domain.user
 import app.domain.user.error.UserNotFoundError
-import app.domain.{user, _}
-import app.domain.user.{NewUserInput, User, UserId, UserRepository, Users}
+import app.domain.user._
 
 import scala.collection.mutable
 

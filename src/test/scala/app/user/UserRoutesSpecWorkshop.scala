@@ -6,11 +6,11 @@ import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import app.domain.user.UserId
-import app.gateway.in.{NewUserApiInput, ReplaceUserApiInput}
-import app.gateway.out.{UserApiOutput, UsersApiOutput}
-import app.gateway.{UserHandlerWorkshop, UserRoutesWorkshop}
-import app.infrastructure.JsonFormatsWorkshop._
-import app.infrastructure.UserServiceConfiguration
+import app.gateway.user.in.{NewUserApiInput, ReplaceUserApiInput}
+import app.gateway.user.out.{UserApiOutput, UsersApiOutput}
+import app.gateway.user.{UserHandlerWorkshop, UserRoutesWorkshop}
+import app.infrastructure.config.UserConfig
+import app.infrastructure.http.JsonFormatsWorkshop._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpec}
 
@@ -24,7 +24,7 @@ class UserRoutesSpecWorkshop extends WordSpec with Matchers with ScalaFutures wi
   implicit def typedSystem = testKit.system
 
   implicit val routeTestTimeout = RouteTestTimeout(Duration(5, TimeUnit.SECONDS))
-  val userService = testKit.spawn(UserServiceConfiguration.workshopBehaviour)
+  val userService = testKit.spawn(UserConfig.workshopBehaviour)
   lazy val routes = new UserRoutesWorkshop(new UserHandlerWorkshop(userService)).userRoutes
 
   override def createActorSystem(): akka.actor.ActorSystem =
