@@ -17,7 +17,7 @@ class UserRoutes(userHandler: UserHandler) {
         pathEnd {
           concat(
             get {
-              complete(userHandler.getUsers())
+              complete(userHandler.getUsers)
             },
             post {
               entity(as[NewUserApiInput]) { user =>
@@ -39,8 +39,8 @@ class UserRoutes(userHandler: UserHandler) {
           concat(
             get {
               onSuccess(userHandler.getUserById(id)) {
-                case Some(value) => complete(value)
-                case None => complete(StatusCodes.NotFound, s"user with given id: $id not found")
+                case Right(value) => complete(value)
+                case Left(error) => complete(StatusCodes.NotFound, error)
               }
             },
             delete {
@@ -52,8 +52,8 @@ class UserRoutes(userHandler: UserHandler) {
             put {
               entity(as[ReplaceUserApiInput]) { user =>
                 onSuccess(userHandler.replaceUser(user.toDomain(id))) {
-                  case Some(value) => complete(value)
-                  case None => complete(StatusCodes.NotFound, s"user with given id: $id not found")
+                  case Right(value) => complete(value)
+                  case Left(error) => complete(StatusCodes.NotFound, error)
                 }
               }
             }
