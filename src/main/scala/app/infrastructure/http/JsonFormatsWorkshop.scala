@@ -1,11 +1,11 @@
-package app.infrastructure
+package app.infrastructure.http
 
 import app.domain.user.UserId
-import app.gateway.in.{NewUserApiInput, ReplaceUserApiInput}
-import app.gateway.out.{UserApiOutput, UsersApiOutput}
+import app.gateway.user.in.{NewUserApiInput, ReplaceUserApiInput}
+import app.gateway.user.out.{UserApiOutput, UsersApiOutput}
 import spray.json.DefaultJsonProtocol
 
-object JsonFormats {
+object JsonFormatsWorkshop {
 
   import DefaultJsonProtocol._
 

@@ -2,7 +2,7 @@ package app
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorSystem, Behavior}
-import app.infrastructure.{HttpServerConfig, RoutesConfig}
+import app.infrastructure.http.{HttpServerConfig, UserRoutesConfig}
 
 object App {
 
@@ -12,7 +12,7 @@ object App {
   }
 
   private def configureRootBehaviour: Behavior[Nothing] = Behaviors.setup[Nothing] { context =>
-    val routes = RoutesConfig.config(context)
+    val routes = UserRoutesConfig.config(context)
     HttpServerConfig.startHttpServer(routes.userRoutes)(context.system)
     Behaviors.empty
   }

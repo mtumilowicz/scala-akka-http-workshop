@@ -1,18 +1,19 @@
-package app.infrastructure
+package app.infrastructure.http
 
 import akka.actor.typed.scaladsl.ActorContext
-import app.gateway.{UserHandler, UserHandlerWorkshop, UserRoutes, UserRoutesWorkshop}
+import app.gateway.user.{UserHandler, UserHandlerWorkshop, UserRoutes, UserRoutesWorkshop}
+import app.infrastructure.config.UserConfig
 
-object RoutesConfig {
+object UserRoutesConfig {
   def config(context: ActorContext[Nothing]): UserRoutes = {
-    val userServiceActor = context.spawn(UserServiceConfiguration.inMemoryBehaviour, "UserServiceActor")
+    val userServiceActor = context.spawn(UserConfig.inMemoryBehaviour, "UserServiceActor")
     context.watch(userServiceActor)
 
     new UserRoutes(new UserHandler(userServiceActor)(context.system))
   }
 
   def configWorkshop(context: ActorContext[Nothing]): UserRoutesWorkshop = {
-    val userServiceActor = context.spawn(UserServiceConfiguration.workshopBehaviour, "UserServiceActor")
+    val userServiceActor = context.spawn(UserConfig.workshopBehaviour, "UserServiceActor")
     context.watch(userServiceActor)
 
     new UserRoutesWorkshop(new UserHandlerWorkshop(userServiceActor)(context.system))

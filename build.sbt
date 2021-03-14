@@ -1,11 +1,11 @@
-lazy val akkaHttpVersion = "10.2.1"
-lazy val akkaVersion    = "2.6.10"
+lazy val akkaHttpVersion = "10.2.4"
+lazy val akkaVersion    = "2.6.13"
 
 lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
       organization    := "com.example",
-      scalaVersion    := "2.13.3"
+      scalaVersion    := "2.13.4"
     )),
     name := "scala-akka-http-actor-workshop",
     libraryDependencies ++= Seq(
@@ -14,10 +14,9 @@ lazy val root = (project in file(".")).
       "com.typesafe.akka" %% "akka-actor-typed"         % akkaVersion,
       "com.typesafe.akka" %% "akka-stream"              % akkaVersion,
       "ch.qos.logback"    % "logback-classic"           % "1.2.3",
-      "io.jvm.uuid"       %% "scala-uuid"               % "0.3.1",
 
       "com.typesafe.akka" %% "akka-http-testkit"        % akkaHttpVersion % Test,
       "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion     % Test,
-      "org.scalatest"     %% "scalatest"                % "3.0.8"         % Test
+      "org.scalatest"     %% "scalatest"                % "3.1.4"         % Test
     )
   )

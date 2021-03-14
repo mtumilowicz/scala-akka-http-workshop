@@ -1,10 +1,10 @@
-package app.infrastructure
+package app.infrastructure.actor
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
 import app.domain.error.DomainError
 import app.domain.user._
-import app.infrastructure.UserActor._
+import app.infrastructure.actor.UserActor._
 
 class UserActor(userService: UserService) {
 

@@ -1,4 +1,4 @@
-package app.infrastructure
+package app.infrastructure.http
 
 import akka.actor.typed.ActorSystem
 import akka.http.scaladsl.Http
