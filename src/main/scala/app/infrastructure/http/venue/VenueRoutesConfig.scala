@@ -1,4 +1,4 @@
-package app.infrastructure.http
+package app.infrastructure.http.venue
 
 import akka.actor.typed.scaladsl.ActorContext
 import app.gateway.venue.VenueRoutes

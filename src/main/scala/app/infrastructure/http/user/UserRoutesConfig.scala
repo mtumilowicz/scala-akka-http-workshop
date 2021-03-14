@@ -1,4 +1,4 @@
-package app.infrastructure.http
+package app.infrastructure.http.user
 
 import akka.actor.typed.scaladsl.ActorContext
 import app.gateway.user.{UserHandler, UserHandlerWorkshop, UserRoutes, UserRoutesWorkshop}
