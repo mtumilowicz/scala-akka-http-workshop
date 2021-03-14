@@ -1,5 +1,6 @@
 package app.infrastructure
 
+import app.domain.user.error.UserNotFoundError
 import app.domain.{user, _}
 import app.domain.user.{NewUserInput, User, UserId, UserRepository, Users}
 
@@ -10,7 +11,8 @@ object UserInMemoryRepository extends UserRepository {
 
   def findAll: Users = user.Users(map.values.toSeq)
 
-  def findById(id: UserId): Option[User] = map.get(id)
+  def findById(id: UserId): Either[UserNotFoundError, User] =
+    map.get(id).toRight(UserNotFoundError(id))
 
   def save(input: NewUserInput): User =
     save(User.createFrom(UserId(java.util.UUID.randomUUID().toString), input))

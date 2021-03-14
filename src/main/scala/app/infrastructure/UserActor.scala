@@ -1,8 +1,10 @@
-package app.domain.user
+package app.infrastructure
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
-import app.domain.user.UserActor._
+import app.domain.error.DomainError
+import app.domain.user._
+import app.infrastructure.UserActor._
 
 class UserActor(userService: UserService) {
 
@@ -35,9 +37,9 @@ object UserActor {
 
   final case class CreateUser(input: NewUserInput, replyTo: ActorRef[User]) extends UserCommand
 
-  final case class ReplaceUser(input: ReplaceUserInput, replyTo: ActorRef[Option[User]]) extends UserCommand
+  final case class ReplaceUser(input: ReplaceUserInput, replyTo: ActorRef[Either[DomainError, User]]) extends UserCommand
 
-  final case class GetUserById(id: UserId, replyTo: ActorRef[Option[User]]) extends UserCommand
+  final case class GetUserById(id: UserId, replyTo: ActorRef[Either[DomainError, User]]) extends UserCommand
 
   final case class DeleteUserById(name: UserId, replyTo: ActorRef[Option[UserId]]) extends UserCommand
 
