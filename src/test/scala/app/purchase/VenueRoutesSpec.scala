@@ -178,8 +178,8 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
     "buying fails when you cannot afford property" in {
       //      given
       val rynekGlowny = createRynekGlowny()
-      val userId = "player1"
-      val buyerIdInput = BuyerIdApiInput(userId)
+      val user1Id = userService.save(NewUserInput("a", NonNegativeAmount(500))).id.raw
+      val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
 
       //        when
@@ -190,15 +190,15 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
         status should ===(StatusCodes.BadRequest)
 
         val outputPost = entityAs[String]
-        outputPost should be(s"${userId} can't afford Rynek Główny")
+        outputPost should be(s"${user1Id} can't afford Rynek Główny")
       }
     }
 
     "venue without owner: buying succeeds when you can afford property" in {
       //      given
+      val user1Id = userService.save(NewUserInput("a", NonNegativeAmount(2000))).id.raw
       val rynekGlowny = createRynekGlowny()
-      val userId = "player2"
-      val buyerIdInput = BuyerIdApiInput(userId)
+      val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
 
       //        when
@@ -209,7 +209,7 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
         status should ===(StatusCodes.OK)
 
         val outputPost = entityAs[String]
-        outputPost should be(s"Rynek Główny was bought by ${userId} for 1000")
+        outputPost should be(s"Rynek Główny was bought by ${user1Id} for 1000")
       }
     }
 
