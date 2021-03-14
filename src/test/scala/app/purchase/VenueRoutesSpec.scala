@@ -10,7 +10,7 @@ import app.gateway.venue.VenueRoutes
 import app.gateway.venue.in.{BuyerIdApiInput, NewVenueApiInput}
 import app.gateway.venue.out.VenueApiOutput
 import app.infrastructure.config.{PurchaseConfig, UserConfig, VenueConfig}
-import app.infrastructure.http.JsonFormats._
+import app.infrastructure.http.venue.VenueJsonFormats._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec

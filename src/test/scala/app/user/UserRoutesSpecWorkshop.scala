@@ -1,7 +1,6 @@
 package app.user
 
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
@@ -10,7 +9,7 @@ import app.gateway.user.in.{NewUserApiInput, ReplaceUserApiInput}
 import app.gateway.user.out.{UserApiOutput, UsersApiOutput}
 import app.gateway.user.{UserHandlerWorkshop, UserRoutesWorkshop}
 import app.infrastructure.config.UserConfig
-import app.infrastructure.http.JsonFormatsWorkshop._
+import app.infrastructure.http.user.UserJsonFormats._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpec}
 
