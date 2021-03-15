@@ -29,9 +29,9 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
 
   val venueService = VenueConfig.inMemoryService()
   val userService = UserConfig.inMemoryService()
-  val purchaseConfig = PurchaseConfig.service(userService, venueService)
+  val purchaseService = PurchaseConfig.service(userService, venueService)
   val venueActor = testKit.spawn(VenueConfig.actor(venueService).behavior())
-  val purchaseActor = testKit.spawn(PurchaseConfig.actor(purchaseConfig).behavior())
+  val purchaseActor = testKit.spawn(PurchaseConfig.actor(purchaseService).behavior())
   lazy val routes = new VenueRoutes(
     venueActor,
     purchaseActor
@@ -54,7 +54,7 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
 
     "return venues if they are present" in {
       //      given
-      val apiOutput = createRandomVenue()
+      createRandomVenue()
 
       //      when
       val request = HttpRequest(uri = "/venues")
@@ -83,7 +83,7 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
         status should ===(StatusCodes.OK)
 
         val output = entityAs[String]
-        output == id
+        output should be (id)
       }
     }
 
@@ -127,6 +127,12 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
         status should ===(StatusCodes.OK)
         entityAs[String] should be(id)
       }
+
+      // and
+      val get = Get(uri = s"/venues/${id}")
+      get ~> routes ~> check {
+        status should ===(StatusCodes.NotFound)
+      }
     }
 
     "remove not existing venue by id" in {
@@ -155,6 +161,18 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
         val outputPut = entityAs[String]
         outputPut should be(id)
       }
+
+      // and
+      val get = Get(uri = s"/venues/${id}")
+      get ~> routes ~> check {
+        status should ===(StatusCodes.OK)
+
+        val outputOfGet = entityAs[VenueApiOutput]
+        outputOfGet.id should be(id)
+        outputOfGet.name should be("DEF")
+        outputOfGet.price should be(333)
+        outputOfGet.owner should be(None)
+      }
     }
 
     "insert venue" in {
@@ -172,6 +190,18 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
 
         val outputPut = entityAs[String]
         outputPut should be(id)
+      }
+
+      // and
+      val get = Get(uri = s"/venues/${id}")
+      get ~> routes ~> check {
+        status should ===(StatusCodes.OK)
+
+        val outputOfGet = entityAs[VenueApiOutput]
+        outputOfGet.id should be(id)
+        outputOfGet.name should be("AAA")
+        outputOfGet.price should be(123)
+        outputOfGet.owner should be(None)
       }
     }
 
@@ -357,4 +387,15 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
       entityAs[String]
     }
   }
+
+//  def createUser(budget: Int): UserApiOutput = {
+//    val user = NewUserApiInput("Kapi", budget)
+//    val userEntity = Marshal(user).to[MessageEntity].futureValue
+//
+//    val request = Post("/users").withEntity(userEntity)
+//
+//    request ~> routes ~> check {
+//      entityAs[UserApiOutput]
+//    }
+//  }
 }
