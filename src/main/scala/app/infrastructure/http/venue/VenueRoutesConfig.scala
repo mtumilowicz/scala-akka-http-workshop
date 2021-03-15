@@ -1,10 +1,8 @@
 package app.infrastructure.http.venue
 
-import akka.actor.typed.scaladsl.ActorContext
 import akka.actor.typed.{ActorRef, ActorSystem}
 import app.gateway.venue.VenueRoutes
 import app.infrastructure.actor.{PurchaseActor, VenueActor}
-import app.infrastructure.config.{PurchaseConfig, UserConfig, VenueConfig}
 
 object VenueRoutesConfig {
 

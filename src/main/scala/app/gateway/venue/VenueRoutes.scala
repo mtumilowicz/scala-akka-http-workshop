@@ -79,9 +79,6 @@ class VenueRoutes(venueActor: ActorRef[VenueActor.VenueCommand],
       .map(_.map(VenueApiOutputBuilder.fromDomain))
       .map(domainErrorAsString)
 
-  def domainErrorAsString[B](either: Either[DomainError, B]): Either[String, B] =
-    either.left.map(_.message())
-
   def createVenue(venueId: VenueId, newVenueApiInput: NewVenueApiInput): Future[VenueApiOutput] =
     venueActor.ask(CreateOrReplaceVenue(newVenueApiInput.toDomain(venueId), _))
       .map(VenueApiOutputBuilder.fromDomain)
@@ -90,6 +87,9 @@ class VenueRoutes(venueActor: ActorRef[VenueActor.VenueCommand],
     purchaseActor.ask(Purchase(buyerId, venueId, _))
       .map(_.map(VenueApiOutputBuilder.fromDomain))
       .map(domainErrorAsString)
+
+  def domainErrorAsString[B](either: Either[DomainError, B]): Either[String, B] =
+    either.left.map(_.message())
 
   def deleteVenue(id: VenueId): Future[Option[String]] =
     venueActor.ask(DeleteVenueById(id, _))

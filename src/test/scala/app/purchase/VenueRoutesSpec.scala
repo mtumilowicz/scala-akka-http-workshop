@@ -26,16 +26,15 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
   implicit def typedSystem = testKit.system
 
   implicit val routeTestTimeout = RouteTestTimeout(Duration(5, TimeUnit.SECONDS))
-
+  lazy val routes = new VenueRoutes(
+    venueActor,
+    purchaseActor
+  ).route
   val venueService = VenueConfig.inMemoryService()
   val userService = UserConfig.inMemoryService()
   val purchaseService = PurchaseConfig.service(userService, venueService)
   val venueActor = testKit.spawn(VenueConfig.actor(venueService).behavior())
   val purchaseActor = testKit.spawn(PurchaseConfig.actor(purchaseService).behavior())
-  lazy val routes = new VenueRoutes(
-    venueActor,
-    purchaseActor
-  ).route
 
   override def createActorSystem(): akka.actor.ActorSystem =
     testKit.system.classicSystem
@@ -83,7 +82,7 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
         status should ===(StatusCodes.OK)
 
         val output = entityAs[String]
-        output should be (id)
+        output should be(id)
       }
     }
 
@@ -388,14 +387,14 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
     }
   }
 
-//  def createUser(budget: Int): UserApiOutput = {
-//    val user = NewUserApiInput("Kapi", budget)
-//    val userEntity = Marshal(user).to[MessageEntity].futureValue
-//
-//    val request = Post("/users").withEntity(userEntity)
-//
-//    request ~> routes ~> check {
-//      entityAs[UserApiOutput]
-//    }
-//  }
+  //  def createUser(budget: Int): UserApiOutput = {
+  //    val user = NewUserApiInput("Kapi", budget)
+  //    val userEntity = Marshal(user).to[MessageEntity].futureValue
+  //
+  //    val request = Post("/users").withEntity(userEntity)
+  //
+  //    request ~> routes ~> check {
+  //      entityAs[UserApiOutput]
+  //    }
+  //  }
 }

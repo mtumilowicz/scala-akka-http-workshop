@@ -6,10 +6,10 @@ import app.gateway.venue.out.VenueApiOutput
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 object VenueJsonFormats extends SprayJsonSupport with DefaultJsonProtocol {
-    implicit val venueOutJsonFormat: RootJsonFormat[VenueApiOutput] = 
-      jsonFormat4(VenueApiOutput)
-    implicit val venueInJsonFormat: RootJsonFormat[NewVenueApiInput] = 
-      jsonFormat2(NewVenueApiInput)
-    implicit val buyerIdInJsonFormat: RootJsonFormat[BuyerIdApiInput] = 
-      jsonFormat1(BuyerIdApiInput)
-  }
+  implicit val venueOutJsonFormat: RootJsonFormat[VenueApiOutput] =
+    jsonFormat4(VenueApiOutput)
+  implicit val venueInJsonFormat: RootJsonFormat[NewVenueApiInput] =
+    jsonFormat2(NewVenueApiInput)
+  implicit val buyerIdInJsonFormat: RootJsonFormat[BuyerIdApiInput] =
+    jsonFormat1(BuyerIdApiInput)
+}

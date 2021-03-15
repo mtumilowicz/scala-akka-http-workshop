@@ -24,8 +24,8 @@ class UserRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
   implicit def typedSystem = testKit.system
 
   implicit val routeTestTimeout = RouteTestTimeout(Duration(5, TimeUnit.SECONDS))
-  val userService = testKit.spawn(UserConfig.inMemoryActor().behavior())
   lazy val routes = new UserRoutes(new UserHandler(userService)).route
+  val userService = testKit.spawn(UserConfig.inMemoryActor().behavior())
 
   override def createActorSystem(): akka.actor.ActorSystem =
     testKit.system.classicSystem

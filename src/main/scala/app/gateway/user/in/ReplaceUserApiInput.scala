@@ -1,7 +1,7 @@
 package app.gateway.user.in
 
-import app.domain.cash.NonNegativeAmount
 import app.domain._
+import app.domain.cash.NonNegativeAmount
 import app.domain.user.{ReplaceUserInput, UserId}
 
 case class ReplaceUserApiInput(name: String, budget: Int) {

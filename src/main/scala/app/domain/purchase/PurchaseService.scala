@@ -3,8 +3,8 @@ package app.domain.purchase
 import app.domain.cash.NonNegativeAmount
 import app.domain.error.DomainError
 import app.domain.purchase.error.{CantAffordBuyingVenue, CantBuyFromYourself}
-import app.domain.user.{UserId, UserService}
 import app.domain.user.error.CantAffordTransactionError
+import app.domain.user.{UserId, UserService}
 import app.domain.venue.{Venue, VenueService}
 
 class PurchaseService(
