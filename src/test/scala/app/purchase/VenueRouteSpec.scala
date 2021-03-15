@@ -6,11 +6,11 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import app.domain.cash.NonNegativeAmount
 import app.domain.user.NewUserInput
-import app.gateway.venue.VenueRoutes
 import app.gateway.venue.in.{BuyerIdApiInput, NewVenueApiInput}
 import app.gateway.venue.out.VenueApiOutput
 import app.infrastructure.config.{PurchaseConfig, UserConfig, VenueConfig}
 import app.infrastructure.http.venue.VenueJsonFormats._
+import app.infrastructure.http.venue.VenueRouteConfig
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -19,17 +19,14 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.Duration
 
-class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with ScalatestRouteTest {
+class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with ScalatestRouteTest {
 
   lazy val testKit = ActorTestKit()
 
   implicit def typedSystem = testKit.system
 
   implicit val routeTestTimeout = RouteTestTimeout(Duration(5, TimeUnit.SECONDS))
-  lazy val routes = new VenueRoutes(
-    venueActor,
-    purchaseActor
-  ).route
+  lazy val routes = VenueRouteConfig.config(venueActor, purchaseActor).route
   val venueService = VenueConfig.inMemoryService()
   val userService = UserConfig.inMemoryService()
   val purchaseService = PurchaseConfig.service(userService, venueService)

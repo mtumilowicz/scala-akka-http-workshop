@@ -8,7 +8,7 @@ import app.gateway.user.in.{NewUserApiInput, ReplaceUserApiInput}
 import app.infrastructure.http.user.UserJsonFormats._
 import com.typesafe.config.ConfigFactory
 
-class UserRoutes(userHandler: UserHandler) {
+class UserRoute(userHandler: UserHandler) {
 
   val route: Route =
     pathPrefix("users") {

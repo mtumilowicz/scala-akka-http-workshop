@@ -1,13 +1,13 @@
 package app.infrastructure.http.venue
 
 import akka.actor.typed.{ActorRef, ActorSystem}
-import app.gateway.venue.VenueRoutes
+import app.gateway.venue.VenueRoute
 import app.infrastructure.actor.{PurchaseActor, VenueActor}
 
-object VenueRoutesConfig {
+object VenueRouteConfig {
 
   def config(venueActor: ActorRef[VenueActor.VenueCommand],
              purchaseActor: ActorRef[PurchaseActor.PurchaseCommand])
-            (implicit system: ActorSystem[_]): VenueRoutes =
-    new VenueRoutes(venueActor, purchaseActor)
+            (implicit system: ActorSystem[_]): VenueRoute =
+    new VenueRoute(venueActor, purchaseActor)
 }
