@@ -52,7 +52,7 @@ class UserRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       //      then
       request ~> routes ~> check {
         status should ===(StatusCodes.OK)
-        entityAs[UsersApiOutput] should not be (UsersApiOutput(Seq()))
+        entityAs[UsersApiOutput] should not be UsersApiOutput(Seq())
       }
     }
 
@@ -116,6 +116,12 @@ class UserRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
         status should ===(StatusCodes.OK)
         entityAs[UserId].raw should be(id)
       }
+
+      // and
+      val get = Get(uri = "/users/" + id)
+      get ~> routes ~> check {
+        status should ===(StatusCodes.NotFound)
+      }
     }
 
     "remove not existing user by id" in {
@@ -139,6 +145,17 @@ class UserRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
       //        then
       requestPut ~> routes ~> check {
+        status should ===(StatusCodes.OK)
+
+        val outputPut = entityAs[UserApiOutput]
+        outputPut.id should be(id)
+        outputPut.name should be("Kapi2")
+        outputPut.budget should be(123)
+      }
+
+      // and
+      val get = Get(uri = "/users/" + id)
+      get ~> routes ~> check {
         status should ===(StatusCodes.OK)
 
         val outputPut = entityAs[UserApiOutput]
