@@ -24,7 +24,7 @@ class VenueRoutes(venueActor: ActorRef[VenueActor.VenueCommand],
 
   private implicit val timeout = Timeout.create(system.settings.config.getDuration("my-app.routes.ask-timeout"))
 
-  val routes: Route = pathPrefix("venues") {
+  val route: Route = pathPrefix("venues") {
     concat(
       pathEnd {
         get {

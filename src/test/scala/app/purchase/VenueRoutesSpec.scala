@@ -35,7 +35,7 @@ class VenueRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
   lazy val routes = new VenueRoutes(
     venueActor,
     purchaseActor
-  ).routes
+  ).route
 
   override def createActorSystem(): akka.actor.ActorSystem =
     testKit.system.classicSystem

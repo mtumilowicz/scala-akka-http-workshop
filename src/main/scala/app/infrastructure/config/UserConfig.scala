@@ -7,8 +7,11 @@ import app.infrastructure.repository.UserInMemoryRepository
 
 object UserConfig {
 
-  def inMemoryBehaviour(): Behavior[UserActor.UserCommand] =
-    new UserActor(inMemoryService()).behavior()
+  def actor(service: UserService): UserActor =
+    new UserActor(service)
+
+  def inMemoryActor(): UserActor =
+    new UserActor(inMemoryService())
 
   def workshopBehaviour(): Behavior[UserServiceProtocolWorkshop.Command] =
     UserServiceProtocolWorkshop(inMemoryService())
