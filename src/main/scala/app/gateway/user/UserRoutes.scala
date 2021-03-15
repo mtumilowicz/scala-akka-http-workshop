@@ -10,7 +10,7 @@ import com.typesafe.config.ConfigFactory
 
 class UserRoutes(userHandler: UserHandler) {
 
-  val userRoutes: Route =
+  val route: Route =
     pathPrefix("users") {
       concat(
         pathEnd {
