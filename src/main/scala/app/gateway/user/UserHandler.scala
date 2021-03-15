@@ -26,6 +26,9 @@ class UserHandler(userService: ActorRef[UserActor.UserCommand])(implicit val sys
       .map(domainErrorAsString)
   }
 
+  def domainErrorAsString[B](either: Either[DomainError, B]): Either[String, B] =
+    either.left.map(_.message())
+
   def createUser(input: NewUserInput): Future[UserApiOutput] =
     userService.ask(CreateUser(input, _)).map(UserApiOutputBuilder.fromDomain)
 
@@ -37,7 +40,4 @@ class UserHandler(userService: ActorRef[UserActor.UserCommand])(implicit val sys
 
   def deleteUserById(id: String): Future[Option[UserId]] =
     userService.ask(DeleteUserById(UserId(id), _))
-
-  def domainErrorAsString[B](either: Either[DomainError, B]): Either[String, B] =
-    either.left.map(_.message())
 }
