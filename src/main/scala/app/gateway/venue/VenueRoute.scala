@@ -19,8 +19,8 @@ import app.infrastructure.http.venue.VenueJsonFormats._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class VenueRoutes(venueActor: ActorRef[VenueActor.VenueCommand],
-                  purchaseActor: ActorRef[PurchaseActor.PurchaseCommand])(implicit val system: ActorSystem[_]) {
+class VenueRoute(venueActor: ActorRef[VenueActor.VenueCommand],
+                 purchaseActor: ActorRef[PurchaseActor.PurchaseCommand])(implicit val system: ActorSystem[_]) {
 
   private implicit val timeout = Timeout.create(system.settings.config.getDuration("my-app.routes.ask-timeout"))
 

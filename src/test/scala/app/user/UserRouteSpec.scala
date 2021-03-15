@@ -7,9 +7,9 @@ import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import app.domain.user.UserId
 import app.gateway.user.in.{NewUserApiInput, ReplaceUserApiInput}
 import app.gateway.user.out.{UserApiOutput, UsersApiOutput}
-import app.gateway.user.{UserHandler, UserRoutes}
 import app.infrastructure.config.UserConfig
 import app.infrastructure.http.user.UserJsonFormats._
+import app.infrastructure.http.user.UserRouteConfig
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -17,15 +17,15 @@ import org.scalatest.wordspec.AnyWordSpec
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.Duration
 
-class UserRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with ScalatestRouteTest {
+class UserRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with ScalatestRouteTest {
 
   lazy val testKit = ActorTestKit()
 
   implicit def typedSystem = testKit.system
 
   implicit val routeTestTimeout = RouteTestTimeout(Duration(5, TimeUnit.SECONDS))
-  lazy val routes = new UserRoutes(new UserHandler(userService)).route
-  val userService = testKit.spawn(UserConfig.inMemoryActor().behavior())
+  lazy val routes = UserRouteConfig.config(userActor).route
+  val userActor = testKit.spawn(UserConfig.inMemoryActor().behavior())
 
   override def createActorSystem(): akka.actor.ActorSystem =
     testKit.system.classicSystem
