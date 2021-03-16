@@ -12,16 +12,16 @@ import app.infrastructure.actor.UserActor._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class UserHandler(userService: ActorRef[UserActor.UserCommand])(implicit val system: ActorSystem[_]) {
+class UserHandler(userActor: ActorRef[UserActor.UserCommand])(implicit val system: ActorSystem[_]) {
 
   private implicit val timeout = Timeout.create(system.settings.config.getDuration("my-app.routes.ask-timeout"))
 
 
   def getUsers: Future[UsersApiOutput] =
-    userService.ask(GetUsers).map(UsersApiOutputBuilder.fromDomain)
+    userActor.ask(GetUsers).map(UsersApiOutputBuilder.fromDomain)
 
   def getUserById(id: String): Future[Either[String, UserApiOutput]] = {
-    userService.ask(GetUserById(UserId(id), _))
+    userActor.ask(GetUserById(UserId(id), _))
       .map(_.map(UserApiOutputBuilder.fromDomain))
       .map(domainErrorAsString)
   }
@@ -30,14 +30,14 @@ class UserHandler(userService: ActorRef[UserActor.UserCommand])(implicit val sys
     either.left.map(_.message())
 
   def createUser(input: NewUserInput): Future[UserApiOutput] =
-    userService.ask(CreateUser(input, _)).map(UserApiOutputBuilder.fromDomain)
+    userActor.ask(CreateUser(input, _)).map(UserApiOutputBuilder.fromDomain)
 
   def replaceUser(input: ReplaceUserInput): Future[Either[String, UserApiOutput]] = {
-    userService.ask(ReplaceUser(input, _))
+    userActor.ask(ReplaceUser(input, _))
       .map(_.map(UserApiOutputBuilder.fromDomain))
       .map(domainErrorAsString)
   }
 
   def deleteUserById(id: String): Future[Option[UserId]] =
-    userService.ask(DeleteUserById(UserId(id), _))
+    userActor.ask(DeleteUserById(UserId(id), _))
 }
