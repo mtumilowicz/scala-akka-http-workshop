@@ -19,6 +19,7 @@
         * lifecycle
     * introduction to akka http
         * routing and marshalling
+    * showing how using actors solve synchronization problems
 * workshop plan:
     1. `UserServiceProtocolWorkshop`
     1. `UserHandlerWorkshop`
@@ -206,7 +207,6 @@
             * Complete, Rejected
     * Directive
         * a small building block used for creating route structures
-        * xxx
             ```
             val route: Route = { ctx => ctx.complete("yeah") } // standard way to build route
             val route: Route = _.complete("yeah") // scala syntax
@@ -215,18 +215,16 @@
         * example
             ```
             val route: Route =
-              path("order" / IntNumber) { id =>
-                get {
-                  complete {
-                    "Received GET request for order " + id
-                  }
-                } ~
-                put {
-                  complete {
-                    "Received PUT request for order " + id
-                  }
+            pathPrefix("venues") {
+                concat(
+                    pathEnd {
+                        get {
+                            complete(handler.action)
+                        }
+                    },
+                  ...
+                )
                 }
-              }
             ```
     * PathMatcher
         * mini-DSL is used to match incoming URL’s and extract values from them
