@@ -1,6 +1,7 @@
 package app.infrastructure.repository
 
 import app.domain.error.DomainError
+import app.domain.user.UserId
 import app.domain.venue.error.VenueNotFoundError
 import app.domain.venue.{Venue, VenueId, VenueRepository, Venues}
 

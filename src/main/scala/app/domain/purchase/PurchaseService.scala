@@ -17,21 +17,23 @@ class PurchaseService(
       .flatMap(venue => checkIfOwnerDifferentThanBuyer(purchase, venue))
       .flatMap(venue => proceed(purchase, venue))
 
-  private def proceed(purchase: NewPurchase, venue: Venue): Either[DomainError, Venue] =
-    userService.postOutgoingAmount(purchase.buyer.toUserId, venue.price)
-      .map(newOwner => {
-        payPreviousOwnerOf(venue)
-        venue.assignOwner(newOwner)
-      })
-      .map(venueService.save)
+  private def proceed(purchase: NewPurchase, venue: Venue): Either[DomainError, Venue] = {
+    val newOwner = purchase.buyer.toUserId
+    userService.postOutgoingAmount(newOwner, venue.price)
+      .flatMap(_ => payPreviousOwnerOf(venue))
+      .flatMap(_ => venueService.changeOwner(venue.id, newOwner))
       .left
       .map {
         case CantAffordTransactionError(userId) => CantAffordBuyingVenue(userId, venue)
         case error => error
       }
+  }
 
-  private def payPreviousOwnerOf(venue: Venue): Option[Either[DomainError, UserId]] =
-    venue.owner.map(previousOwner => makePayTo(previousOwner, venue.price))
+  private def payPreviousOwnerOf(venue: Venue): Either[DomainError, Option[UserId]] =
+    venue.owner match {
+      case Some(previousOwner) => makePayTo(previousOwner, venue.price).map(Some(_))
+      case None => Right(None)
+    }
 
   private def makePayTo(recipient: UserId, price: NonNegativeAmount): Either[DomainError, UserId] =
     userService.postIncomingAmount(recipient, price)
