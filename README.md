@@ -34,15 +34,7 @@
                 * during purchase we need to modify two entities: venue and user
                 * the operation should not be synchronous: use pattern saga
                 * for simplicity we left it without saga and rollbacks
-    1. `UserServiceProtocolWorkshop`
-    1. `UserHandlerWorkshop`
-    1. `JsonFormatsWorkshop`
-    1. `UserRoutesWorkshop`
-    1. `RoutesConfig`
-    1. `UserServiceConfiguration`
-    1. run `UserRoutesSpecWorkshop`: change `"UserRoutes" ignore` -> `"UserRoutes" should`
-    1. run `App` using workshop config and test it manually using Insomnia
-    
+
 ## introduction
 * two ultimate goals during software development
     1. complexity has to stay as low as possible
