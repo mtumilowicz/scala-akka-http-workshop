@@ -30,6 +30,10 @@
             * CRUD
         * purchase
             * selling and buying venues
+            * remark about atomicity
+                * during purchase we need to modify two entities: venue and user
+                * the operation should not be synchronous: use pattern saga
+                * for simplicity we left it without saga and rollbacks
     1. `UserServiceProtocolWorkshop`
     1. `UserHandlerWorkshop`
     1. `JsonFormatsWorkshop`
