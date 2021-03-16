@@ -19,8 +19,17 @@
         * lifecycle
     * introduction to akka http
         * routing and marshalling
-    * showing how using actors solve synchronization problems
+    * show how using actors solve synchronization problems
 * workshop plan:
+    * implement a project with three domains
+        * user
+            * CRUD
+            * posting incoming transactions
+            * posting outgoing transactions
+        * venue
+            * CRUD
+        * purchase
+            * selling and buying venues
     1. `UserServiceProtocolWorkshop`
     1. `UserHandlerWorkshop`
     1. `JsonFormatsWorkshop`
