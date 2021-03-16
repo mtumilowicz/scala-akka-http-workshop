@@ -1,7 +1,7 @@
 package app.infrastructure.config
 
 import app.domain.user.{UserRepository, UserService}
-import app.infrastructure.actor.{UserActor, UserActorWorkshop}
+import app.infrastructure.actor.{UserActor}
 import app.infrastructure.repository.UserInMemoryRepository
 
 object UserConfig {
