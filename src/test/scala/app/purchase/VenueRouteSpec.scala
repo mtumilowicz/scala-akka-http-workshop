@@ -89,14 +89,14 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       request ~> route ~> check {
         status should ===(StatusCodes.OK)
 
-        val output = entityAs[String]
-        output should be(id)
+        val output = entityAs[VenueApiOutput]
+        output.id should be(id)
       }
     }
 
     "get existing venue by id" in {
       //      given
-      val id = VenueTestFacade.createRandomVenue().raw.toString
+      val id = VenueTestFacade.createRandomVenue().id
 
       //        when
       val get = Get(uri = "/venues/" + id)
@@ -124,7 +124,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
     "remove existing venue by id" in {
       //      given
-      val id = VenueTestFacade.createRandomVenue().raw.toString
+      val id = VenueTestFacade.createRandomVenue().id
 
       //        when
       val delete = Delete(uri = "/venues/" + id)
@@ -154,7 +154,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
     "replace existing venue" in {
       //      given
-      val id = VenueTestFacade.createRandomVenue().raw.toString
+      val id = VenueTestFacade.createRandomVenue().id
       val venuePut = NewVenueApiInput("DEF", 333)
       val venueEntity = Marshal(venuePut).to[MessageEntity].futureValue
 
@@ -165,8 +165,8 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       requestPut ~> route ~> check {
         status should ===(StatusCodes.OK)
 
-        val outputPut = entityAs[String]
-        outputPut should be(id)
+        val outputPut = entityAs[VenueApiOutput]
+        outputPut.id should be(id)
       }
 
       // and
@@ -195,8 +195,8 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       requestPut ~> route ~> check {
         status should ===(StatusCodes.OK)
 
-        val outputPut = entityAs[String]
-        outputPut should be(id)
+        val outputPut = entityAs[VenueApiOutput]
+        outputPut.id should be(id)
       }
 
       // and
@@ -214,7 +214,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
     "buying fails when you cannot afford property" in {
       //      given
-      val venue = VenueTestFacade.createVenue(1000).raw.toString
+      val venue = VenueTestFacade.createVenue(1000).id
       val user1Id = UserTestFacade.createUser(500).id
       val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
@@ -237,7 +237,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
     "venue without owner: buying succeeds when you can afford property" in {
       //      given
       val user1Id = UserTestFacade.createUser(2000).id
-      val venueId = VenueTestFacade.createVenue(1000).raw.toString
+      val venueId = VenueTestFacade.createVenue(1000).id
       val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
 
@@ -262,7 +262,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val user2Id = UserTestFacade.createUser(1000).id
 
       //      and
-      val venue = VenueTestFacade.createVenue(500).raw.toString
+      val venue = VenueTestFacade.createVenue(500).id
       val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
       val requestPost = Post(uri = s"/venues/${venue}/buy").withEntity(buyerIdEntity)
@@ -293,7 +293,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val user1Id = UserTestFacade.createUser(500).id
 
       //      and
-      val venue = VenueTestFacade.createRandomVenue().raw.toString
+      val venue = VenueTestFacade.createRandomVenue().id
       val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
       val requestPost = Post(uri = s"/venues/${venue}/buy").withEntity(buyerIdEntity)
@@ -324,7 +324,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val user2Id = UserTestFacade.createUser(1000).id
 
       //      and
-      val venue = VenueTestFacade.createRandomVenue().raw.toString
+      val venue = VenueTestFacade.createRandomVenue().id
       val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
       val requestPost = Post(uri = s"/venues/${venue}/buy").withEntity(buyerIdEntity)
@@ -349,7 +349,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val user1Id = UserTestFacade.createUser(500).id
 
       //      when
-      val venue = VenueTestFacade.createVenue(300).raw.toString
+      val venue = VenueTestFacade.createVenue(300).id
       val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
       val requestPost = Post(uri = s"/venues/${venue}/buy").withEntity(buyerIdEntity)
