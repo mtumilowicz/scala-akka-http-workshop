@@ -9,14 +9,8 @@ object UserConfig {
   def inMemoryActor(): UserActor =
     actor(inMemoryService())
 
-  def inMemoryActorWorkshop(): UserActor =
-    actorWorkshop(inMemoryService())
-
   def actor(service: UserService): UserActor =
     new UserActor(service)
-
-  def actorWorkshop(service: UserService): UserActor =
-    new UserActorWorkshop(service)
 
   def inMemoryService(): UserService =
     new UserService(inMemoryRepository())
