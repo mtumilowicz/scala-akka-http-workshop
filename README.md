@@ -21,6 +21,7 @@
         * routing and marshalling
     * show how using actors solve synchronization problems
 * workshop plan:
+    * switch to `workshop` brach
     * implement a project with three domains
         * user
             * CRUD
