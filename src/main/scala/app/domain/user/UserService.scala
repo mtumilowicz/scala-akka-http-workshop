@@ -5,14 +5,14 @@ import app.domain.error.DomainError
 
 class UserService(repository: UserRepository) {
 
-  def incomingAmount(userId: UserId, amount: NonNegativeAmount): Either[DomainError, UserId] =
-    repository.findById(userId)
+  def postIncomingAmount(recipient: UserId, amount: NonNegativeAmount): Either[DomainError, UserId] =
+    repository.findById(recipient)
       .map(_.indexIncomingAmount(amount))
       .map(repository.save)
       .map(_.id)
 
-  def outgoingAmount(userId: UserId, amount: NonNegativeAmount): Either[DomainError, UserId] =
-    repository.findById(userId)
+  def postOutgoingAmount(payer: UserId, amount: NonNegativeAmount): Either[DomainError, UserId] =
+    repository.findById(payer)
       .flatMap(_.indexOutgoingAmount(amount))
       .map(repository.save)
       .map(_.id)

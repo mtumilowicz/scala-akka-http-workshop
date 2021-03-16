@@ -17,7 +17,7 @@ class PurchaseService(
     .flatMap(venue => proceed(purchase, venue))
 
   private def proceed(purchase: NewPurchase, venue: Venue): Either[DomainError, Venue] =
-    userService.outgoingAmount(purchase.buyer.toUserId, venue.price)
+    userService.postOutgoingAmount(purchase.buyer.toUserId, venue.price)
       .map(newOwner => {
         payPreviousOwnerOf(venue)
         venue.assignOwner(newOwner)
@@ -33,7 +33,7 @@ class PurchaseService(
     venue.owner.map(previousOwner => pay(previousOwner, venue.price))
 
   private def pay(previousOwner: UserId, price: NonNegativeAmount): Either[DomainError, UserId] =
-    userService.incomingAmount(previousOwner, price)
+    userService.postIncomingAmount(previousOwner, price)
 
   private def checkIfOwnerDifferentThanBuyer(purchase: NewPurchase, venue: Venue): Either[DomainError, Venue] = {
     val userId = purchase.buyer.toUserId
