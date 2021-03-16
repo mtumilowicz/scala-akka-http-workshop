@@ -19,8 +19,7 @@ import app.infrastructure.http.JsonFormats._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class VenueRoute(venueActor: ActorRef[VenueActor.VenueCommand],
-                 purchaseActor: ActorRef[PurchaseActor.PurchaseCommand])(implicit val system: ActorSystem[_]) {
+class VenueRoute(venueHandler: VenueHandler)(implicit val system: ActorSystem[_]) {
 
   private implicit val timeout = Timeout.create(system.settings.config.getDuration("my-app.routes.ask-timeout"))
 
@@ -28,14 +27,14 @@ class VenueRoute(venueActor: ActorRef[VenueActor.VenueCommand],
     concat(
       pathEnd {
         get {
-          complete(getVenues)
+          complete(venueHandler.getVenues)
         }
       },
       path(JavaUUID) { id =>
         concat(
           get {
             rejectEmptyResponse {
-              onSuccess(getVenue(VenueId(id))) {
+              onSuccess(venueHandler.getVenue(VenueId(id))) {
                 case Right(value) => complete(value)
                 case Left(error) => complete(StatusCodes.NotFound, error)
               }
@@ -43,14 +42,14 @@ class VenueRoute(venueActor: ActorRef[VenueActor.VenueCommand],
           },
           put {
             entity(as[NewVenueApiInput]) { venue =>
-              onSuccess(createVenue(VenueId(id), venue)) { venue => {
+              onSuccess(venueHandler.createVenue(VenueId(id), venue)) { venue => {
                 complete(StatusCodes.OK, venue.id)
               }
               }
             }
           },
           delete {
-            onSuccess(deleteVenue(VenueId(id))) {
+            onSuccess(venueHandler.deleteVenue(VenueId(id))) {
               case Some(value) => complete(value)
               case None => complete(StatusCodes.NotFound, s"Venue with given id: $id does not exist.")
             }
@@ -60,7 +59,7 @@ class VenueRoute(venueActor: ActorRef[VenueActor.VenueCommand],
       path(JavaUUID / "buy") { id =>
         post {
           entity(as[BuyerIdApiInput]) { buyerId =>
-            onSuccess(purchase(buyerId.toDomain, VenueId(id))) {
+            onSuccess(venueHandler.purchase(buyerId.toDomain, VenueId(id))) {
               case Left(error) => complete(StatusCodes.BadRequest, error)
               case Right(value) => complete(StatusCodes.OK,
                 s"${value.name} was bought by ${value.owner.orNull} for ${value.price}")
@@ -70,28 +69,4 @@ class VenueRoute(venueActor: ActorRef[VenueActor.VenueCommand],
       }
     )
   }
-
-  def getVenues: Future[List[VenueApiOutput]] =
-    venueActor.ask(GetVenues).map(VenueApiOutputBuilder.fromDomain)
-
-  def getVenue(id: VenueId): Future[Either[String, VenueApiOutput]] =
-    venueActor.ask(GetVenueById(id, _))
-      .map(_.map(VenueApiOutputBuilder.fromDomain))
-      .map(domainErrorAsString)
-
-  def createVenue(venueId: VenueId, newVenueApiInput: NewVenueApiInput): Future[VenueApiOutput] =
-    venueActor.ask(CreateOrReplaceVenue(newVenueApiInput.toDomain(venueId), _))
-      .map(VenueApiOutputBuilder.fromDomain)
-
-  def purchase(buyerId: BuyerId, venueId: VenueId): Future[Either[String, VenueApiOutput]] =
-    purchaseActor.ask(Purchase(buyerId, venueId, _))
-      .map(_.map(VenueApiOutputBuilder.fromDomain))
-      .map(domainErrorAsString)
-
-  def domainErrorAsString[B](either: Either[DomainError, B]): Either[String, B] =
-    either.left.map(_.message())
-
-  def deleteVenue(id: VenueId): Future[Option[String]] =
-    venueActor.ask(DeleteVenueById(id, _))
-      .map(_.map(_.asString()))
 }
