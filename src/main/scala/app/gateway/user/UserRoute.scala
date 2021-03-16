@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import app.gateway.user.in.{NewUserApiInput, ReplaceUserApiInput}
-import app.infrastructure.http.user.UserJsonFormats._
+import app.infrastructure.http.JsonFormats._
 import com.typesafe.config.ConfigFactory
 
 class UserRoute(userHandler: UserHandler) {
