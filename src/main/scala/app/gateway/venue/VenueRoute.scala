@@ -1,23 +1,13 @@
 package app.gateway.venue
 
-import akka.actor.typed.scaladsl.AskPattern._
-import akka.actor.typed.{ActorRef, ActorSystem}
+import akka.actor.typed.ActorSystem
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives.{complete, concat, get, path, pathEnd, pathPrefix, _}
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
-import app.domain.error.DomainError
-import app.domain.purchase.BuyerId
 import app.domain.venue.VenueId
 import app.gateway.venue.in.{BuyerIdApiInput, NewVenueApiInput}
-import app.gateway.venue.out.{VenueApiOutput, VenueApiOutputBuilder}
-import app.infrastructure.actor.PurchaseActor.Purchase
-import app.infrastructure.actor.VenueActor._
-import app.infrastructure.actor.{PurchaseActor, VenueActor}
 import app.infrastructure.http.JsonFormats._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class VenueRoute(venueHandler: VenueHandler)(implicit val system: ActorSystem[_]) {
 
@@ -43,7 +33,7 @@ class VenueRoute(venueHandler: VenueHandler)(implicit val system: ActorSystem[_]
           put {
             entity(as[NewVenueApiInput]) { venue =>
               onSuccess(venueHandler.createVenue(VenueId(id), venue)) { venue => {
-                complete(StatusCodes.OK, venue.id)
+                complete(StatusCodes.OK, venue)
               }
               }
             }
