@@ -4,16 +4,19 @@ import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
-import app.domain.cash.NonNegativeAmount
-import app.domain.user.NewUserInput
 import app.gateway.venue.in.{BuyerIdApiInput, NewVenueApiInput}
 import app.gateway.venue.out.VenueApiOutput
 import app.infrastructure.config.{PurchaseConfig, UserConfig, VenueConfig}
-import app.infrastructure.http.venue.VenueJsonFormats._
+import app.infrastructure.http.user.UserRouteConfig
 import app.infrastructure.http.venue.VenueRouteConfig
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import app.infrastructure.http.JsonFormats._
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
+import app.gateway.user.in.NewUserApiInput
+import app.gateway.user.out.UserApiOutput
 
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -26,12 +29,20 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
   implicit def typedSystem = testKit.system
 
   implicit val routeTestTimeout = RouteTestTimeout(Duration(5, TimeUnit.SECONDS))
-  lazy val routes = VenueRouteConfig.config(venueActor, purchaseActor).route
-  val venueService = VenueConfig.inMemoryService()
-  val userService = UserConfig.inMemoryService()
-  val purchaseService = PurchaseConfig.service(userService, venueService)
-  val venueActor = testKit.spawn(VenueConfig.actor(venueService).behavior())
-  val purchaseActor = testKit.spawn(PurchaseConfig.actor(purchaseService).behavior())
+
+  val route = prepareRoute()
+
+  def prepareRoute(): Route = {
+    val venueService = VenueConfig.inMemoryService()
+    val userService = UserConfig.inMemoryService()
+    val purchaseService = PurchaseConfig.service(userService, venueService)
+    val venueActor = testKit.spawn(VenueConfig.actor(venueService).behavior())
+    val purchaseActor = testKit.spawn(PurchaseConfig.actor(purchaseService).behavior())
+    val userActor = testKit.spawn(UserConfig.actor(userService).behavior())
+    val venueRoute = VenueRouteConfig.config(venueActor, purchaseActor).route
+    val userRoute = UserRouteConfig.config(userActor).route
+    venueRoute ~ userRoute
+  }
 
   override def createActorSystem(): akka.actor.ActorSystem =
     testKit.system.classicSystem
@@ -42,7 +53,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val request = HttpRequest(uri = "/venues")
 
       //      then
-      request ~> routes ~> check {
+      request ~> route ~> check {
         status should ===(StatusCodes.OK)
         entityAs[List[VenueApiOutput]] should be(List())
       }
@@ -56,7 +67,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val request = HttpRequest(uri = "/venues")
 
       //      then
-      request ~> routes ~> check {
+      request ~> route ~> check {
         status should ===(StatusCodes.OK)
         entityAs[List[VenueApiOutput]] should not be empty
       }
@@ -75,7 +86,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val request = Put(s"/venues/$id").withEntity(venueEntity)
 
       //      then
-      request ~> routes ~> check {
+      request ~> route ~> check {
         status should ===(StatusCodes.OK)
 
         val output = entityAs[String]
@@ -91,7 +102,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val get = Get(uri = "/venues/" + id)
 
       //        then
-      get ~> routes ~> check {
+      get ~> route ~> check {
         status should ===(StatusCodes.OK)
         val outputOfGet = entityAs[VenueApiOutput]
         outputOfGet.id should be(id)
@@ -106,7 +117,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val get = Get(uri = s"/venues/${UUID.randomUUID().toString}")
 
       //        then
-      get ~> routes ~> check {
+      get ~> route ~> check {
         status should ===(StatusCodes.NotFound)
       }
     }
@@ -119,14 +130,14 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val delete = Delete(uri = "/venues/" + id)
 
       //        then
-      delete ~> routes ~> check {
+      delete ~> route ~> check {
         status should ===(StatusCodes.OK)
         entityAs[String] should be(id)
       }
 
       // and
       val get = Get(uri = s"/venues/${id}")
-      get ~> routes ~> check {
+      get ~> route ~> check {
         status should ===(StatusCodes.NotFound)
       }
     }
@@ -136,7 +147,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val delete = Delete(uri = s"/venues/${UUID.randomUUID().toString}")
 
       //        then
-      delete ~> routes ~> check {
+      delete ~> route ~> check {
         status should ===(StatusCodes.NotFound)
       }
     }
@@ -151,7 +162,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val requestPut = Put(uri = "/venues/" + id).withEntity(venueEntity)
 
       //        then
-      requestPut ~> routes ~> check {
+      requestPut ~> route ~> check {
         status should ===(StatusCodes.OK)
 
         val outputPut = entityAs[String]
@@ -160,7 +171,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
       // and
       val get = Get(uri = s"/venues/${id}")
-      get ~> routes ~> check {
+      get ~> route ~> check {
         status should ===(StatusCodes.OK)
 
         val outputOfGet = entityAs[VenueApiOutput]
@@ -181,7 +192,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val requestPut = Put(uri = s"/venues/$id").withEntity(venueEntity)
 
       //        then
-      requestPut ~> routes ~> check {
+      requestPut ~> route ~> check {
         status should ===(StatusCodes.OK)
 
         val outputPut = entityAs[String]
@@ -190,7 +201,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
       // and
       val get = Get(uri = s"/venues/${id}")
-      get ~> routes ~> check {
+      get ~> route ~> check {
         status should ===(StatusCodes.OK)
 
         val outputOfGet = entityAs[VenueApiOutput]
@@ -204,7 +215,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
     "buying fails when you cannot afford property" in {
       //      given
       val rynekGlowny = createRynekGlowny()
-      val user1Id = userService.save(NewUserInput("a", NonNegativeAmount(500))).id.raw
+      val user1Id = createUser(500).id
       val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
 
@@ -212,7 +223,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val requestPost = Post(uri = s"/venues/${rynekGlowny}/buy").withEntity(buyerIdEntity)
 
       //        then
-      requestPost ~> routes ~> check {
+      requestPost ~> route ~> check {
         status should ===(StatusCodes.BadRequest)
 
         val outputPost = entityAs[String]
@@ -222,7 +233,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
     "venue without owner: buying succeeds when you can afford property" in {
       //      given
-      val user1Id = userService.save(NewUserInput("a", NonNegativeAmount(2000))).id.raw
+      val user1Id = createUser(2000).id
       val rynekGlowny = createRynekGlowny()
       val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
@@ -231,7 +242,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val requestPost = Post(uri = s"/venues/${rynekGlowny}/buy").withEntity(buyerIdEntity)
 
       //        then
-      requestPost ~> routes ~> check {
+      requestPost ~> route ~> check {
         status should ===(StatusCodes.OK)
 
         val outputPost = entityAs[String]
@@ -241,15 +252,15 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
     "venue with owner: buying succeeds when you can afford property" in {
       //      given
-      val user1Id = userService.save(NewUserInput("a", NonNegativeAmount(500))).id.raw
-      val user2Id = userService.save(NewUserInput("b", NonNegativeAmount(1000))).id.raw
+      val user1Id = createUser(500).id
+      val user2Id = createUser(1000).id
 
       //      and
       val venue = createRandomVenue()
       val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
       val requestPost = Post(uri = s"/venues/${venue}/buy").withEntity(buyerIdEntity)
-      requestPost ~> routes ~> check {
+      requestPost ~> route ~> check {
         status should ===(StatusCodes.OK)
       }
 
@@ -259,7 +270,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val requestPost2 = Post(uri = s"/venues/${venue}/buy").withEntity(nextBuyerIdEntity)
 
       //        then
-      requestPost2 ~> routes ~> check {
+      requestPost2 ~> route ~> check {
         status should ===(StatusCodes.OK)
 
         val outputPost = entityAs[String]
@@ -270,15 +281,14 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
     "venue with owner: buying fails if buyer same as owner" in {
       //      given
-      val user1Id = userService.save(NewUserInput("a", NonNegativeAmount(500))).id.raw
-      val user2Id = userService.save(NewUserInput("b", NonNegativeAmount(1000))).id.raw
+      val user1Id = createUser(500).id
 
       //      and
       val venue = createRandomVenue()
       val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
       val requestPost = Post(uri = s"/venues/${venue}/buy").withEntity(buyerIdEntity)
-      requestPost ~> routes ~> check {
+      requestPost ~> route ~> check {
         status should ===(StatusCodes.OK)
       }
 
@@ -288,7 +298,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val requestPost2 = Post(uri = s"/venues/${venue}/buy").withEntity(nextBuyerIdEntity)
 
       //        then
-      requestPost2 ~> routes ~> check {
+      requestPost2 ~> route ~> check {
         status should ===(StatusCodes.BadRequest)
 
         val outputPost = entityAs[String]
@@ -298,15 +308,15 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
     "selling property increases budget of seller" in {
       //      given
-      val user1Id = userService.save(NewUserInput("a", NonNegativeAmount(500))).id.raw
-      val user2Id = userService.save(NewUserInput("b", NonNegativeAmount(1000))).id.raw
+      val user1Id = createUser(500).id
+      val user2Id = createUser(1000).id
 
       //      and
       val venue = createRandomVenue()
       val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
       val requestPost = Post(uri = s"/venues/${venue}/buy").withEntity(buyerIdEntity)
-      requestPost ~> routes ~> check {
+      requestPost ~> route ~> check {
         status should ===(StatusCodes.OK)
       }
 
@@ -314,14 +324,14 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
       val nextBuyerIdInput = BuyerIdApiInput(user2Id)
       val nextBuyerIdEntity = Marshal(nextBuyerIdInput).to[MessageEntity].futureValue
       val requestPost2 = Post(uri = s"/venues/${venue}/buy").withEntity(nextBuyerIdEntity)
-      requestPost2 ~> routes ~> check {
+      requestPost2 ~> route ~> check {
         status should ===(StatusCodes.OK)
       }
 
       //      when
       val nextVenue = createRandomVenue()
       val requestPost3 = Post(uri = s"/venues/${nextVenue}/buy").withEntity(buyerIdEntity)
-      requestPost3 ~> routes ~> check {
+      requestPost3 ~> route ~> check {
         status should ===(StatusCodes.OK)
 
         val outputPost = entityAs[String]
@@ -331,21 +341,21 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
     "buying property decreases budget of buyer" in {
       //      given
-      val user1Id = userService.save(NewUserInput("a", NonNegativeAmount(500))).id.raw
+      val user1Id = createUser(500).id
 
       //      and
       val venue = createRandomVenue()
       val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
       val requestPost = Post(uri = s"/venues/${venue}/buy").withEntity(buyerIdEntity)
-      requestPost ~> routes ~> check {
+      requestPost ~> route ~> check {
         status should ===(StatusCodes.OK)
       }
 
       //      and
       val nextVenue = createRandomVenue()
       val requestPost2 = Post(uri = s"/venues/${nextVenue}/buy").withEntity(buyerIdEntity)
-      requestPost2 ~> routes ~> check {
+      requestPost2 ~> route ~> check {
         status should ===(StatusCodes.BadRequest)
 
         val outputPost = entityAs[String]
@@ -364,7 +374,7 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
     val request = Put(s"/venues/${UUID.randomUUID()}").withEntity(venueEntity)
 
-    request ~> routes ~> check {
+    request ~> route ~> check {
       entityAs[String]
     }
   }
@@ -379,19 +389,19 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
     val request = Put(s"/venues/acf869a2-9f1e-4f9c-b95d-a0f1932e3428").withEntity(venueEntity)
 
-    request ~> routes ~> check {
+    request ~> route ~> check {
       entityAs[String]
     }
   }
 
-  //  def createUser(budget: Int): UserApiOutput = {
-  //    val user = NewUserApiInput("Kapi", budget)
-  //    val userEntity = Marshal(user).to[MessageEntity].futureValue
-  //
-  //    val request = Post("/users").withEntity(userEntity)
-  //
-  //    request ~> routes ~> check {
-  //      entityAs[UserApiOutput]
-  //    }
-  //  }
+    def createUser(budget: Int): UserApiOutput = {
+      val user = NewUserApiInput("Kapi", budget)
+      val userEntity = Marshal(user).to[MessageEntity].futureValue
+
+      val request = Post("/users").withEntity(userEntity)
+
+      request ~> route ~> check {
+        entityAs[UserApiOutput]
+      }
+    }
 }

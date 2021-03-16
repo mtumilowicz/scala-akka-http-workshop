@@ -3,12 +3,13 @@ package app.user
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import app.domain.user.UserId
 import app.gateway.user.in.{NewUserApiInput, ReplaceUserApiInput}
 import app.gateway.user.out.{UserApiOutput, UsersApiOutput}
 import app.infrastructure.config.UserConfig
-import app.infrastructure.http.user.UserJsonFormats._
+import app.infrastructure.http.JsonFormats._
 import app.infrastructure.http.user.UserRouteConfig
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -24,8 +25,12 @@ class UserRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
   implicit def typedSystem = testKit.system
 
   implicit val routeTestTimeout = RouteTestTimeout(Duration(5, TimeUnit.SECONDS))
-  lazy val routes = UserRouteConfig.config(userActor).route
-  val userActor = testKit.spawn(UserConfig.inMemoryActor().behavior())
+  val route = prepareRoute()
+
+  def prepareRoute(): Route = {
+    val userActor = testKit.spawn(UserConfig.inMemoryActor().behavior())
+    UserRouteConfig.config(userActor).route
+  }
 
   override def createActorSystem(): akka.actor.ActorSystem =
     testKit.system.classicSystem
@@ -36,7 +41,7 @@ class UserRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
       val request = HttpRequest(uri = "/users")
 
       //      then
-      request ~> routes ~> check {
+      request ~> route ~> check {
         status should ===(StatusCodes.OK)
         entityAs[UsersApiOutput] should be(UsersApiOutput(Seq()))
       }
@@ -50,7 +55,7 @@ class UserRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
       val request = HttpRequest(uri = "/users")
 
       //      then
-      request ~> routes ~> check {
+      request ~> route ~> check {
         status should ===(StatusCodes.OK)
         entityAs[UsersApiOutput] should not be UsersApiOutput(Seq())
       }
@@ -65,7 +70,7 @@ class UserRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
       val request = Post("/users").withEntity(userEntity)
 
       //      then
-      request ~> routes ~> check {
+      request ~> route ~> check {
         status should ===(StatusCodes.Created)
 
         val output = entityAs[UserApiOutput]
@@ -85,7 +90,7 @@ class UserRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
       val get = Get(uri = "/users/" + id)
 
       //        then
-      get ~> routes ~> check {
+      get ~> route ~> check {
         status should ===(StatusCodes.OK)
         val outputOfGet = entityAs[UserApiOutput]
         outputOfGet.id should be(id)
@@ -99,7 +104,7 @@ class UserRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
       val get = Get(uri = "/users/not-present")
 
       //        then
-      get ~> routes ~> check {
+      get ~> route ~> check {
         status should ===(StatusCodes.NotFound)
       }
     }
@@ -112,14 +117,14 @@ class UserRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
       val delete = Delete(uri = "/users/" + id)
 
       //        then
-      delete ~> routes ~> check {
+      delete ~> route ~> check {
         status should ===(StatusCodes.OK)
         entityAs[UserId].raw should be(id)
       }
 
       // and
       val get = Get(uri = "/users/" + id)
-      get ~> routes ~> check {
+      get ~> route ~> check {
         status should ===(StatusCodes.NotFound)
       }
     }
@@ -129,7 +134,7 @@ class UserRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
       val delete = Delete(uri = "/users/not-present")
 
       //        then
-      delete ~> routes ~> check {
+      delete ~> route ~> check {
         status should ===(StatusCodes.NotFound)
       }
     }
@@ -144,7 +149,7 @@ class UserRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
       val requestPut = Put(uri = "/users/" + id).withEntity(userEntity)
 
       //        then
-      requestPut ~> routes ~> check {
+      requestPut ~> route ~> check {
         status should ===(StatusCodes.OK)
 
         val outputPut = entityAs[UserApiOutput]
@@ -155,7 +160,7 @@ class UserRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
 
       // and
       val get = Get(uri = "/users/" + id)
-      get ~> routes ~> check {
+      get ~> route ~> check {
         status should ===(StatusCodes.OK)
 
         val outputPut = entityAs[UserApiOutput]
@@ -174,7 +179,7 @@ class UserRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
       val requestPut = Put(uri = "/users/not-present").withEntity(userEntity)
 
       //        then
-      requestPut ~> routes ~> check {
+      requestPut ~> route ~> check {
         status should ===(StatusCodes.NotFound)
       }
     }
@@ -185,7 +190,7 @@ class UserRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
 
       val request = Post("/users").withEntity(userEntity)
 
-      request ~> routes ~> check {
+      request ~> route ~> check {
         entityAs[UserApiOutput]
       }
     }
