@@ -38,10 +38,10 @@ class VenueHandler(venueActor: ActorRef[VenueActor.VenueCommand],
       .map(_.map(VenueApiOutputBuilder.fromDomain))
       .map(domainErrorAsString)
 
-  def domainErrorAsString[B](either: Either[DomainError, B]): Either[String, B] =
-    either.left.map(_.message())
-
   def deleteVenue(id: VenueId): Future[Option[String]] =
     venueActor.ask(DeleteVenueById(id, _))
       .map(_.map(_.asString()))
+
+  def domainErrorAsString[B](either: Either[DomainError, B]): Either[String, B] =
+    either.left.map(_.message())
 }
