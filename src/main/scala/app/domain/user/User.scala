@@ -24,5 +24,5 @@ object User {
     User(userId, input.name, input.budget)
 
   def createFrom(input: ReplaceUserInput): User =
-    User(input.id, input.name, input.price)
+    User(input.id, input.name, input.budget)
 }
