@@ -27,7 +27,7 @@ class PurchaseService(
       }
   }
 
-  private def pay(payer: UserId, venue: Venue) =
+  private def pay(payer: UserId, venue: Venue): Either[DomainError, UserId] =
     venue.owner match {
       case Some(owner) => userService.transfer(owner, payer, venue.price)
       case None => userService.postOutgoingAmount(payer, venue.price)
