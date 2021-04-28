@@ -1,13 +1,13 @@
 package app.infrastructure.http.user
 
-import akka.actor.typed.{ActorRef, ActorSystem}
+import akka.actor.typed.{ActorSystem}
+import app.domain.user.UserService
 import app.gateway.user.{UserHandler, UserRoute}
-import app.infrastructure.actor.UserActor
 
 object UserRouteConfig {
 
-  def config(userActor: ActorRef[UserActor.UserCommand])
+  def config(userService: UserService)
             (implicit system: ActorSystem[_]): UserRoute = {
-    new UserRoute(new UserHandler(userActor))
+    new UserRoute(new UserHandler(userService))
   }
 }

@@ -28,8 +28,8 @@ class UserRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
   val route = prepareRoute()
 
   def prepareRoute(): Route = {
-    val userActor = testKit.spawn(UserConfig.inMemoryActor().behavior())
-    UserRouteConfig.config(userActor).route
+    val userService = UserConfig.inMemoryService()
+    UserRouteConfig.config(userService).route
   }
 
   override def createActorSystem(): akka.actor.ActorSystem =

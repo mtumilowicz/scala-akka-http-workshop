@@ -4,7 +4,9 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.ActorContext
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import app.infrastructure.actor.{PurchaseActor, UserActor, VenueActor}
+import app.domain.purchase.PurchaseService
+import app.domain.user.UserService
+import app.domain.venue.VenueService
 import app.infrastructure.config.{PurchaseConfig, UserConfig, VenueConfig}
 import app.infrastructure.http.user.UserRouteConfig
 import app.infrastructure.http.venue.VenueRouteConfig
@@ -17,26 +19,20 @@ object RouteConfig {
     val venueService = VenueConfig.inMemoryService()
     val purchaseService = PurchaseConfig.service(userService, venueService)
 
-    route(UserConfig.actor(userService),
-      VenueConfig.actor(venueService),
-      PurchaseConfig.actor(purchaseService)
+    route(userService,
+      venueService,
+      purchaseService
     )
   }
 
-  private def route(userActor: UserActor,
-                    venueActor: VenueActor,
-                    purchaseActor: PurchaseActor)
+  private def route(userService: UserService,
+                    venueService: VenueService,
+                    purchaseService: PurchaseService)
                    (implicit context: ActorContext[Nothing]): Route = {
     implicit val system: ActorSystem[Nothing] = context.system
-    val user = context.spawn(userActor.behavior(), "UserServiceActor")
-    context.watch(context.spawn(userActor.behavior(), "UserServiceActor"))
-    val venue = context.spawn(venueActor.behavior(), "VenueActor")
-    context.watch(venue)
-    val purchase = context.spawn(purchaseActor.behavior(), "PurchaseActor")
-    context.watch(purchase)
 
-    val userRoute = UserRouteConfig.config(user)
-    val venueRoute = VenueRouteConfig.config(venue, purchase)
+    val userRoute = UserRouteConfig.config(userService)
+    val venueRoute = VenueRouteConfig.config(venueService, purchaseService)
     userRoute.route ~ venueRoute.route
   }
 }

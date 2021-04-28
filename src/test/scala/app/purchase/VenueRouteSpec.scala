@@ -36,11 +36,8 @@ class VenueRouteSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
     val venueService = VenueConfig.inMemoryService()
     val userService = UserConfig.inMemoryService()
     val purchaseService = PurchaseConfig.service(userService, venueService)
-    val venueActor = testKit.spawn(VenueConfig.actor(venueService).behavior())
-    val purchaseActor = testKit.spawn(PurchaseConfig.actor(purchaseService).behavior())
-    val userActor = testKit.spawn(UserConfig.actor(userService).behavior())
-    val venueRoute = VenueRouteConfig.config(venueActor, purchaseActor).route
-    val userRoute = UserRouteConfig.config(userActor).route
+    val venueRoute = VenueRouteConfig.config(venueService, purchaseService).route
+    val userRoute = UserRouteConfig.config(userService).route
     venueRoute ~ userRoute
   }
 
