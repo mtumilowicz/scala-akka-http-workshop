@@ -49,7 +49,7 @@ class VenueRoutes(venueService: VenueService,
       complete(getVenues)
     }
 
-  def getVenues: Future[List[VenueApiOutput]] =
+  private def getVenues: Future[List[VenueApiOutput]] =
     venueService.findAll
       .map(VenueApiOutputBuilder.fromDomain)
 
@@ -63,12 +63,12 @@ class VenueRoutes(venueService: VenueService,
       }
     }
 
-  def getVenue(id: VenueId): EitherT[Future, String, VenueApiOutput] =
+  private def getVenue(id: VenueId): EitherT[Future, String, VenueApiOutput] =
     venueService.findById(id)
       .map(VenueApiOutputBuilder.fromDomain)
       .leftMap(x => domainErrorAsString(x))
 
-  def domainErrorAsString[B](error: DomainError): String =
+  private def domainErrorAsString[B](error: DomainError): String =
     error match {
       case CantAffordBuyingVenueError(userId, venue) => s"${userId.raw} can't afford ${venue.name}"
       case CantBuyFromYourselfError(userId) => s"User ${userId.raw} cannot buy from himself."
@@ -88,7 +88,7 @@ class VenueRoutes(venueService: VenueService,
       }
     }
 
-  def createVenue(venueId: VenueId, newVenueApiInput: NewVenueApiInput): EitherT[Future, NonEmptyChain[String], Venue] =
+  private def createVenue(venueId: VenueId, newVenueApiInput: NewVenueApiInput): EitherT[Future, NonEmptyChain[String], Venue] =
     newVenueApiInput.toDomain(venueId) match {
       case Validated.Valid(a) => venueService.save(a).leftMap(domainErrorAsString).leftMap(NonEmptyChain(_))
       case Validated.Invalid(e) => Left(e).leftMap(_.map(domainErrorAsString)).toEitherT
@@ -102,7 +102,7 @@ class VenueRoutes(venueService: VenueService,
       }
     }
 
-  def deleteVenue(id: VenueId): OptionT[Future, String] =
+  private def deleteVenue(id: VenueId): OptionT[Future, String] =
     venueService.deleteById(id)
       .map(_.raw)
 
@@ -117,7 +117,7 @@ class VenueRoutes(venueService: VenueService,
       }
     }
 
-  def purchase(buyerId: UserId, venueId: VenueId): EitherT[Future, String, VenueApiOutput] =
+  private def purchase(buyerId: UserId, venueId: VenueId): EitherT[Future, String, VenueApiOutput] =
     purchaseService.purchase(NewPurchase(buyerId, venueId))
       .map(x => VenueApiOutputBuilder.fromDomain(x))
       .leftMap(x => domainErrorAsString(x))
