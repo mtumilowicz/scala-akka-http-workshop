@@ -12,11 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class UserInMemoryBalanceRepository extends UserBalanceRepository {
-  val map: Map[UserId, UserBalance] =
-    TrieMap(
-      UserId("player1") -> UserBalance(UserId("player1"), createAmountOrZero(500)),
-      UserId("player2") -> UserBalance(UserId("player2"), createAmountOrZero(2000))
-    )
+  val map: Map[UserId, UserBalance] = TrieMap()
 
   override def findById(userId: UserId): EitherT[Future, DomainError, UserBalance] =
     map.get(userId).toRight[DomainError](UserNotFoundError(userId)).toEitherT
@@ -25,7 +21,4 @@ class UserInMemoryBalanceRepository extends UserBalanceRepository {
     map.put(user.id, user)
     Right(user.id).toEitherT
   }
-
-  private def createAmountOrZero(bigInt: BigInt): NonNegativeAmount =
-    NonNegativeAmount(bigInt).getOrElse(NonNegativeAmount.ZERO)
 }

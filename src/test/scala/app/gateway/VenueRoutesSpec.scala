@@ -204,10 +204,13 @@ class VenueRoutesSpec extends AnyFeatureSpec with GivenWhenThen with ScalaFuture
   }
   Feature("venues - business") {
     Scenario("buying fails when you cannot afford property") {
+      Given("prepare players")
+      val user1Id = UUID.randomUUID().toString
+      userBalanceService.save(UserBalance(UserId(user1Id), NonNegativeAmount(500).value))
+
       Given("prepare input")
       val trumpTower = createVenue(1000, "Trump Tower")
-      val userId = "player1"
-      val buyerIdInput = BuyerIdApiInput(userId)
+      val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
 
       When("buy venue")
@@ -218,15 +221,18 @@ class VenueRoutesSpec extends AnyFeatureSpec with GivenWhenThen with ScalaFuture
         status should ===(StatusCodes.BadRequest)
 
         val outputPost = entityAs[String]
-        outputPost should be(s"${userId} can't afford Trump Tower")
+        outputPost should be(s"${user1Id} can't afford Trump Tower")
       }
     }
 
     Scenario("venue without owner: buying succeeds when you can afford property") {
+      Given("prepare players")
+      val user1Id = UUID.randomUUID().toString
+      userBalanceService.save(UserBalance(UserId(user1Id), NonNegativeAmount(1000).value))
+
       Given("prepare input")
       val trumpTower = createVenue(1000, "Trump Tower")
-      val userId = "player2"
-      val buyerIdInput = BuyerIdApiInput(userId)
+      val buyerIdInput = BuyerIdApiInput(user1Id)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
 
       When("buying venue")
@@ -237,7 +243,7 @@ class VenueRoutesSpec extends AnyFeatureSpec with GivenWhenThen with ScalaFuture
         status should ===(StatusCodes.OK)
 
         val outputPost = entityAs[String]
-        outputPost should be(s"Trump Tower was bought by ${userId} for 1000")
+        outputPost should be(s"Trump Tower was bought by ${user1Id} for 1000")
       }
 
       And("get the bought venue")
@@ -248,12 +254,12 @@ class VenueRoutesSpec extends AnyFeatureSpec with GivenWhenThen with ScalaFuture
         status should ===(StatusCodes.OK)
 
         val outputGet = entityAs[VenueApiOutput]
-        outputGet.owner.value shouldBe userId
+        outputGet.owner.value shouldBe user1Id
       }
     }
 
     Scenario("venue with owner: buying succeeds when you can afford property") {
-      Given("prepare input")
+      Given("prepare players")
       val user1Id = UUID.randomUUID().toString
       val user2Id = UUID.randomUUID().toString
       userBalanceService.save(UserBalance(UserId(user1Id), NonNegativeAmount(500).value))
