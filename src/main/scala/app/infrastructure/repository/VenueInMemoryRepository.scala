@@ -1,26 +1,29 @@
 package app.infrastructure.repository
 
+import cats.data.{EitherT, OptionT}
+import cats.implicits._
 import app.domain.error.DomainError
-import app.domain.user.UserId
 import app.domain.venue.error.VenueNotFoundError
 import app.domain.venue.{Venue, VenueId, VenueRepository, Venues}
 
-import scala.collection.mutable
+import scala.collection.concurrent.{Map, TrieMap}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class VenueInMemoryRepository extends VenueRepository {
-  val map: mutable.Map[VenueId, Venue] = mutable.Map()
+  val map: Map[VenueId, Venue] = TrieMap()
 
-  override def findAll: Venues =
-    Venues(map.values.toList)
+  override def findAll: Future[Venues] =
+    Future(Venues(map.values.toList))
 
-  override def findById(id: VenueId): Either[DomainError, Venue] =
-    map.get(id).toRight(VenueNotFoundError(id))
+  override def findById(id: VenueId): EitherT[Future, DomainError, Venue] =
+    map.get(id).toRight[DomainError](VenueNotFoundError(id)).toEitherT
 
-  override def save(venue: Venue): Venue = {
+  override def save(venue: Venue): EitherT[Future, DomainError, Venue] = {
     map.put(venue.id, venue)
-    venue
+    Right(venue).toEitherT
   }
 
-  override def deleteById(id: VenueId): Option[VenueId] =
-    map.remove(id).map(_.id)
+  override def deleteById(id: VenueId): OptionT[Future, VenueId] =
+    map.remove(id).map(_.id).toOptionT
 }

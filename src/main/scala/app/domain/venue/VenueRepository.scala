@@ -1,14 +1,17 @@
 package app.domain.venue
 
+import cats.data.{EitherT, OptionT}
 import app.domain.error.DomainError
+
+import scala.concurrent.Future
 
 trait VenueRepository {
 
-  def findAll: Venues
+  def findAll: Future[Venues]
 
-  def findById(id: VenueId): Either[DomainError, Venue]
+  def findById(id: VenueId): EitherT[Future, DomainError, Venue]
 
-  def save(venue: Venue): Venue
+  def save(venue: Venue): EitherT[Future, DomainError, Venue]
 
-  def deleteById(id: VenueId): Option[VenueId]
+  def deleteById(id: VenueId): OptionT[Future, VenueId]
 }
