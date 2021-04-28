@@ -204,44 +204,44 @@ class VenueRoutesSpec extends AnyFeatureSpec with GivenWhenThen with ScalaFuture
   }
   Feature("venues - business") {
     Scenario("buying fails when you cannot afford property") {
-      Given("preapre input")
-      val rynekGlowny = createRynekGlowny()
+      Given("prepare input")
+      val trumpTower = createVenue(1000, "Trump Tower")
       val userId = "player1"
       val buyerIdInput = BuyerIdApiInput(userId)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
 
       When("buy venue")
-      val requestPost = Post(uri = s"/venues/${rynekGlowny}/buy").withEntity(buyerIdEntity)
+      val requestPost = Post(uri = s"/venues/${trumpTower}/buy").withEntity(buyerIdEntity)
 
       Then("insufficient funds")
       requestPost ~> routes ~> check {
         status should ===(StatusCodes.BadRequest)
 
         val outputPost = entityAs[String]
-        outputPost should be(s"${userId} can't afford Rynek Główny")
+        outputPost should be(s"${userId} can't afford Trump Tower")
       }
     }
 
     Scenario("venue without owner: buying succeeds when you can afford property") {
       Given("prepare input")
-      val rynekGlowny = createRynekGlowny()
+      val trumpTower = createVenue(1000, "Trump Tower")
       val userId = "player2"
       val buyerIdInput = BuyerIdApiInput(userId)
       val buyerIdEntity = Marshal(buyerIdInput).to[MessageEntity].futureValue
 
       When("buying venue")
-      val requestPost = Post(uri = s"/venues/${rynekGlowny}/buy").withEntity(buyerIdEntity)
+      val requestPost = Post(uri = s"/venues/${trumpTower}/buy").withEntity(buyerIdEntity)
 
       Then("success")
       requestPost ~> routes ~> check {
         status should ===(StatusCodes.OK)
 
         val outputPost = entityAs[String]
-        outputPost should be(s"Rynek Główny was bought by ${userId} for 1000")
+        outputPost should be(s"Trump Tower was bought by ${userId} for 1000")
       }
 
       And("get the bought venue")
-      val requestGet = Get(uri = "/venues/" + rynekGlowny)
+      val requestGet = Get(uri = "/venues/" + trumpTower)
 
       Then("new owner")
       requestGet ~> routes ~> check {
@@ -295,29 +295,18 @@ class VenueRoutesSpec extends AnyFeatureSpec with GivenWhenThen with ScalaFuture
   }
 
   def createRandomVenue(): String = {
+    createVenue(500, "XYZ")
+  }
+
+  def createVenue(price: Int, name: String): String = {
     val venueInput = NewVenueApiInput(
-      price = 500,
-      name = "XYZ"
+      price = price,
+      name = name
     )
 
     val venueEntity = Marshal(venueInput).to[MessageEntity].futureValue
 
     val request = Put(s"/venues/${UUID.randomUUID()}").withEntity(venueEntity)
-
-    request ~> routes ~> check {
-      entityAs[String]
-    }
-  }
-
-  def createRynekGlowny(): String = {
-    val venueInput = NewVenueApiInput(
-      price = 1000,
-      name = "Rynek Główny"
-    )
-
-    val venueEntity = Marshal(venueInput).to[MessageEntity].futureValue
-
-    val request = Put(s"/venues/acf869a2-9f1e-4f9c-b95d-a0f1932e3428").withEntity(venueEntity)
 
     request ~> routes ~> check {
       entityAs[String]
