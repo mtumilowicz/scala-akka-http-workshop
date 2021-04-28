@@ -21,20 +21,7 @@
         * routing and marshalling
     * show how using actors solve synchronization problems
 * workshop plan:
-    * switch to `workshop` brach
-    * implement a project with three domains
-        * user
-            * CRUD
-            * posting incoming transactions
-            * posting outgoing transactions
-        * venue
-            * CRUD
-        * purchase
-            * selling and buying venues
-            * remark about atomicity
-                * during purchase we need to modify two entities: venue and user
-                * the operation should not be synchronous: use pattern saga
-                * for simplicity we left it without saga and rollbacks
+
 
 ## introduction
 * two ultimate goals during software development
