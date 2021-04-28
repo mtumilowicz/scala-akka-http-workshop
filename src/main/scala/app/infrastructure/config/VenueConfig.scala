@@ -10,5 +10,4 @@ object VenueConfig {
 
   def inMemoryRepository(): VenueRepository =
     new VenueInMemoryRepository()
-
 }

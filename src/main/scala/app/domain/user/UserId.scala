@@ -1,3 +1,3 @@
 package app.domain.user
 
-case class UserId(raw: String)
+case class UserId(raw: String) extends AnyVal

@@ -1,8 +1,3 @@
 package app.domain.venue
 
-import java.util.UUID
-
-case class VenueId(raw: UUID) {
-  def asString(): String =
-    raw.toString
-}
+case class VenueId(raw: String) extends AnyVal

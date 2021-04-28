@@ -1,20 +1,20 @@
 package app.infrastructure.config
 
 import app.domain.purchase.PurchaseService
-import app.domain.user.UserService
+import app.domain.user.UserBalanceService
 import app.domain.venue.VenueService
 
 object PurchaseConfig {
 
   def inMemoryService(): PurchaseService =
     service(
-      userService = UserConfig.inMemoryService(),
+      userBalanceService = UserBalanceConfig.inMemoryService(),
       venueService = VenueConfig.inMemoryService()
     )
 
-  def service(userService: UserService, venueService: VenueService): PurchaseService =
+  def service(userBalanceService: UserBalanceService, venueService: VenueService): PurchaseService =
     new PurchaseService(
-      userService = userService,
+      userBalanceService = userBalanceService,
       venueService = venueService
     )
 
