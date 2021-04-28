@@ -21,7 +21,9 @@
         * routing and marshalling
     * show how using actors solve synchronization problems
 * workshop plan:
-
+    * microservice with features
+        * user could buy a venue if he can afford it
+        * userA could buy a venue from userB if he can afford it
 
 ## introduction
 * two ultimate goals during software development
