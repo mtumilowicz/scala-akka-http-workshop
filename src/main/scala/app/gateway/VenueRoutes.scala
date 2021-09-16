@@ -66,7 +66,7 @@ class VenueRoutes(venueService: VenueService,
   private def getVenue(id: VenueId): EitherT[Future, String, VenueApiOutput] =
     venueService.findById(id)
       .map(VenueApiOutputBuilder.fromDomain)
-      .leftMap(x => domainErrorAsString(x))
+      .leftMap(domainErrorAsString)
 
   private def domainErrorAsString[B](error: DomainError): String =
     error match {
@@ -119,6 +119,6 @@ class VenueRoutes(venueService: VenueService,
 
   private def purchase(buyerId: UserId, venueId: VenueId): EitherT[Future, String, VenueApiOutput] =
     purchaseService.purchase(NewPurchase(buyerId, venueId))
-      .map(x => VenueApiOutputBuilder.fromDomain(x))
-      .leftMap(x => domainErrorAsString(x))
+      .map(VenueApiOutputBuilder.fromDomain)
+      .leftMap(domainErrorAsString)
 }
