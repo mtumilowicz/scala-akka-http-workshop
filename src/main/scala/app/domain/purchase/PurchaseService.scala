@@ -1,12 +1,12 @@
 package app.domain.purchase
 
-import cats.data._
-import cats.implicits._
 import app.domain.error.DomainError
 import app.domain.purchase.error.{CantAffordBuyingVenueError, CantBuyFromYourselfError}
 import app.domain.user.error.CantAffordTransactionError
 import app.domain.user.{UserBalanceService, UserId}
 import app.domain.venue.{Venue, VenueService}
+import cats.data._
+import cats.implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -17,9 +17,11 @@ class PurchaseService(
                      ) {
 
   def purchase(purchase: NewPurchase): EitherT[Future, DomainError, Venue] =
-    venueService.findById(purchase.venue)
-      .flatMap(venue => checkIfOwnerDifferentThanBuyer(purchase, venue).toEitherT)
-      .flatMap(venue => proceed(purchase, venue))
+    for {
+      venue <- venueService.findById(purchase.venue)
+      verifiedVenue <- checkIfOwnerDifferentThanBuyer(purchase, venue).toEitherT[Future]
+      purchasedVenue <- proceed(purchase, verifiedVenue)
+    } yield purchasedVenue
 
   private def proceed(purchase: NewPurchase, venue: Venue): EitherT[Future, DomainError, Venue] = {
     val newOwner = purchase.buyer

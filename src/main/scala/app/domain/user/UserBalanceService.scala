@@ -1,9 +1,9 @@
 package app.domain.user
 
-import cats.data._
-import cats.implicits._
 import app.domain.cash.NonNegativeAmount
 import app.domain.error.DomainError
+import cats.data._
+import cats.implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -21,13 +21,17 @@ class UserBalanceService(val repository: UserBalanceRepository) {
       .flatMap(_ => postIncomingAmount(recipient, amount))
 
   def postOutgoingAmount(payer: UserId, amount: NonNegativeAmount): EitherT[Future, DomainError, UserId] =
-    repository.findById(payer)
-      .flatMap(_.indexOutgoingAmount(amount).toEitherT)
-      .flatMap(repository.save)
+    for {
+      balance <- repository.findById(payer)
+      chargedBalance <- balance.indexOutgoingAmount(amount).toEitherT[Future]
+      currentBalance <- repository.save(chargedBalance)
+    } yield currentBalance
 
   private def postIncomingAmount(recipient: UserId, amount: NonNegativeAmount): EitherT[Future, DomainError, UserId] =
-    repository.findById(recipient)
-      .map(_.indexIncomingAmount(amount))
-      .flatMap(repository.save)
+    for {
+      balance <- repository.findById(recipient)
+      creditedBalance = balance.indexIncomingAmount(amount)
+      currentBalance <- repository.save(creditedBalance)
+    } yield currentBalance
 
 }
