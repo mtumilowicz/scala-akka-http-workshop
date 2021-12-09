@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/mtumilowicz/scala-akka-http-actor-workshop.svg?branch=master)](https://travis-ci.com/mtumilowicz/scala-akka-http-actor-workshop)
+[![Build Status](https://travis-ci.com/mtumilowicz/scala-akka-http-workshop.svg?branch=master)](https://travis-ci.com/mtumilowicz/scala-akka-http-actor-workshop)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 # scala-akka-http-workshop
