@@ -6,7 +6,6 @@
     * https://medium.com/se-notes-by-alexey-novakov/crud-microservice-with-akkahttp-c914059bcf9f
     * https://www.manning.com/books/akka-in-action
     * https://doc.akka.io/docs/akka-http/10.2.1/
-    * https://medium.com/akka-for-newbies/actor-lifecycle-94b05bd2f600
 
 ## preface
 * goals of this workshops
