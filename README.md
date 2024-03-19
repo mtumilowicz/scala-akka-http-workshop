@@ -8,7 +8,7 @@
     * https://doc.akka.io/docs/akka-http/10.2.1/
 
 ## preface
-* goals of this workshops
+* goals of this workshop
     * introduction to akka http
         * routing and marshalling
 * workshop plan:
